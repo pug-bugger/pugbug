@@ -1,3 +1,4 @@
+import DateTimePicker from "@react-native-community/datetimepicker";
 import React, { useEffect, useState } from "react";
 import {
   Alert,
@@ -28,15 +29,31 @@ export const TruckModal: React.FC<TruckModalProps> = ({
 }) => {
   const [name, setName] = useState("");
   const [note, setNote] = useState("");
+  const [insuranceDeadline, setInsuranceDeadline] = useState<Date | null>(null);
+  const [techInspectionDeadline, setTechInspectionDeadline] =
+    useState<Date | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showInsurancePicker, setShowInsurancePicker] = useState(false);
+  const [showTechInspectionPicker, setShowTechInspectionPicker] =
+    useState(false);
 
   useEffect(() => {
     if (visible && truck && mode === "edit") {
       setName(truck.name);
       setNote(truck.note);
+      setInsuranceDeadline(
+        truck.insuranceDeadline ? new Date(truck.insuranceDeadline) : null
+      );
+      setTechInspectionDeadline(
+        truck.techInspectionDeadline
+          ? new Date(truck.techInspectionDeadline)
+          : null
+      );
     } else if (visible && mode === "add") {
       setName("");
       setNote("");
+      setInsuranceDeadline(null);
+      setTechInspectionDeadline(null);
     }
   }, [visible, truck, mode]);
 
@@ -51,6 +68,8 @@ export const TruckModal: React.FC<TruckModalProps> = ({
       const truckData = {
         name: name.trim(),
         note: note.trim(),
+        insuranceDeadline: insuranceDeadline?.toISOString() || null,
+        techInspectionDeadline: techInspectionDeadline?.toISOString() || null,
       };
 
       await onSave(truckData);
@@ -67,10 +86,37 @@ export const TruckModal: React.FC<TruckModalProps> = ({
     onClose();
   };
 
+  const formatDate = (date: Date | null) => {
+    if (!date) return "Not set";
+    return date.toLocaleDateString();
+  };
+
+  const handleInsuranceDateChange = (event: any, selectedDate?: Date) => {
+    setShowInsurancePicker(false);
+    if (selectedDate) {
+      setInsuranceDeadline(selectedDate);
+    }
+  };
+
+  const handleTechInspectionDateChange = (event: any, selectedDate?: Date) => {
+    setShowTechInspectionPicker(false);
+    if (selectedDate) {
+      setTechInspectionDeadline(selectedDate);
+    }
+  };
+
+  const clearInsuranceDate = () => {
+    setInsuranceDeadline(null);
+  };
+
+  const clearTechInspectionDate = () => {
+    setTechInspectionDeadline(null);
+  };
+
   return (
     <Modal
       visible={visible}
-      animationType="slide"
+      animationType="fade"
       transparent={true}
       onRequestClose={handleCancel}
     >
@@ -106,6 +152,56 @@ export const TruckModal: React.FC<TruckModalProps> = ({
             />
           </View>
 
+          <View style={styles.inputContainer}>
+            <ThemedText style={styles.label}>Insurance Deadline</ThemedText>
+            <View style={styles.dateContainer}>
+              <TouchableOpacity
+                style={styles.dateButton}
+                onPress={() => setShowInsurancePicker(true)}
+                disabled={loading}
+              >
+                <ThemedText style={styles.dateButtonText}>
+                  {formatDate(insuranceDeadline)}
+                </ThemedText>
+              </TouchableOpacity>
+              {insuranceDeadline && (
+                <TouchableOpacity
+                  style={styles.clearButton}
+                  onPress={clearInsuranceDate}
+                  disabled={loading}
+                >
+                  <ThemedText style={styles.clearButtonText}>Clear</ThemedText>
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+
+          <View style={styles.inputContainer}>
+            <ThemedText style={styles.label}>
+              Tech Inspection Deadline
+            </ThemedText>
+            <View style={styles.dateContainer}>
+              <TouchableOpacity
+                style={styles.dateButton}
+                onPress={() => setShowTechInspectionPicker(true)}
+                disabled={loading}
+              >
+                <ThemedText style={styles.dateButtonText}>
+                  {formatDate(techInspectionDeadline)}
+                </ThemedText>
+              </TouchableOpacity>
+              {techInspectionDeadline && (
+                <TouchableOpacity
+                  style={styles.clearButton}
+                  onPress={clearTechInspectionDate}
+                  disabled={loading}
+                >
+                  <ThemedText style={styles.clearButtonText}>Clear</ThemedText>
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={[styles.button, styles.cancelButton]}
@@ -131,6 +227,26 @@ export const TruckModal: React.FC<TruckModalProps> = ({
           </View>
         </ThemedView>
       </View>
+
+      {showInsurancePicker && (
+        <DateTimePicker
+          value={insuranceDeadline || new Date()}
+          mode="date"
+          display="default"
+          onChange={handleInsuranceDateChange}
+          minimumDate={new Date()}
+        />
+      )}
+
+      {showTechInspectionPicker && (
+        <DateTimePicker
+          value={techInspectionDeadline || new Date()}
+          mode="date"
+          display="default"
+          onChange={handleTechInspectionDateChange}
+          minimumDate={new Date()}
+        />
+      )}
     </Modal>
   );
 };
@@ -175,6 +291,34 @@ const styles = StyleSheet.create({
   textArea: {
     height: 80,
     textAlignVertical: "top",
+  },
+  dateContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  dateButton: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    padding: 12,
+    backgroundColor: "#fff",
+  },
+  dateButtonText: {
+    fontSize: 16,
+    color: "#333",
+  },
+  clearButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: "#dc3545",
+    borderRadius: 6,
+  },
+  clearButtonText: {
+    color: "white",
+    fontSize: 14,
+    fontWeight: "600",
   },
   buttonContainer: {
     flexDirection: "row",

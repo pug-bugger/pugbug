@@ -12,6 +12,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { TruckModal } from "@/components/TruckModal";
 import { IconSymbol } from "@/components/ui/IconSymbol";
+import { Menu } from "@/components/ui/Menu";
 import { useTrucks } from "@/hooks/useTrucks";
 import { CreateTruckData, Truck, UpdateTruckData } from "@/types/Truck";
 
@@ -84,6 +85,34 @@ export default function HomeScreen() {
     return new Date(dateString).toLocaleDateString();
   };
 
+  const formatDeadline = (dateString: string | null) => {
+    if (!dateString) return "Not set";
+    return new Date(dateString).toLocaleDateString();
+  };
+
+  const isOverdue = (dateString: string | null) => {
+    if (!dateString) return false;
+    return new Date(dateString) < new Date();
+  };
+
+  const isUpcoming = (dateString: string | null) => {
+    if (!dateString) return false;
+    const deadline = new Date(dateString);
+    const now = new Date();
+    const thirtyDaysFromNow = new Date();
+    thirtyDaysFromNow.setDate(now.getDate() + 30);
+    return deadline <= thirtyDaysFromNow && deadline > now;
+  };
+
+  const getDeadlineStyle = (dateString: string | null) => {
+    if (isOverdue(dateString)) {
+      return styles.overdueText;
+    } else if (isUpcoming(dateString)) {
+      return styles.upcomingText;
+    }
+    return styles.deadlineText;
+  };
+
   const headerContent = (
     <ThemedView style={styles.headerContent}>
       <ThemedText style={styles.headerContentText} type="title">
@@ -148,24 +177,38 @@ export default function HomeScreen() {
           trucks.map((truck) => (
             <ThemedView key={truck.id} style={styles.truckContainer}>
               <ThemedView style={styles.truckHeader}>
-                <ThemedText type="subtitle">Truck {truck.name}</ThemedText>
+                <ThemedText type="subtitle">{truck.name}</ThemedText>
                 <ThemedView style={styles.truckActions}>
-                  <Pressable
-                    style={styles.actionButton}
-                    onPress={() => handleEditTruck(truck)}
-                  >
-                    <IconSymbol size={20} name="pencil" color="#007bff" />
-                  </Pressable>
-                  <Pressable
-                    style={styles.actionButton}
-                    onPress={() => handleDeleteTruck(truck)}
-                  >
-                    <IconSymbol size={20} name="trash" color="#dc3545" />
-                  </Pressable>
+                  <Menu
+                    onEdit={() => handleEditTruck(truck)}
+                    onDelete={() => handleDeleteTruck(truck)}
+                  />
                 </ThemedView>
               </ThemedView>
 
               <ThemedText style={styles.truckNote}>{truck.note}</ThemedText>
+
+              <ThemedView style={styles.deadlinesContainer}>
+                <ThemedView style={styles.deadlineItem}>
+                  <ThemedText style={styles.deadlineLabel}>
+                    Insurance:
+                  </ThemedText>
+                  <ThemedText style={getDeadlineStyle(truck.insuranceDeadline)}>
+                    {formatDeadline(truck.insuranceDeadline)}
+                  </ThemedText>
+                </ThemedView>
+
+                <ThemedView style={styles.deadlineItem}>
+                  <ThemedText style={styles.deadlineLabel}>
+                    Tech Inspection:
+                  </ThemedText>
+                  <ThemedText
+                    style={getDeadlineStyle(truck.techInspectionDeadline)}
+                  >
+                    {formatDeadline(truck.techInspectionDeadline)}
+                  </ThemedText>
+                </ThemedView>
+              </ThemedView>
 
               <ThemedView style={styles.truckMeta}>
                 <ThemedText style={styles.metaText}>
@@ -229,6 +272,34 @@ const styles = StyleSheet.create({
   truckNote: {
     fontStyle: "italic",
     color: "#666",
+  },
+  deadlinesContainer: {
+    gap: 4,
+    marginTop: 8,
+  },
+  deadlineItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  deadlineLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#333",
+  },
+  deadlineText: {
+    fontSize: 14,
+    color: "#28a745",
+  },
+  overdueText: {
+    fontSize: 14,
+    color: "#dc3545",
+    fontWeight: "600",
+  },
+  upcomingText: {
+    fontSize: 14,
+    color: "#ffc107",
+    fontWeight: "600",
   },
   truckMeta: {
     flexDirection: "row",

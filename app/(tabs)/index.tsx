@@ -82,12 +82,12 @@ export default function HomeScreen() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString();
+    return new Date(dateString).toLocaleDateString("lt-LT");
   };
 
   const formatDeadline = (dateString: string | null) => {
     if (!dateString) return "Not set";
-    return new Date(dateString).toLocaleDateString();
+    return new Date(dateString).toLocaleDateString("lt-LT");
   };
 
   const isOverdue = (dateString: string | null) => {
@@ -123,8 +123,8 @@ export default function HomeScreen() {
           position: "absolute",
           right: 24,
           bottom: 12,
-          backgroundColor: "rgba(255, 255, 255, 0.4)",
-          borderRadius: 10,
+          backgroundColor: "rgba(209, 208, 208, 0.8)",
+          borderRadius: 20,
           padding: 4,
         }}
       >

@@ -1,4 +1,3 @@
-import DateTimePicker from "@react-native-community/datetimepicker";
 import React, { useEffect, useState } from "react";
 import {
   Alert,
@@ -8,6 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { CreateTruckData, Truck, UpdateTruckData } from "../types/Truck";
 import { ThemedText } from "./ThemedText";
 import { ThemedView } from "./ThemedView";
@@ -33,8 +33,9 @@ export const TruckModal: React.FC<TruckModalProps> = ({
   const [techInspectionDeadline, setTechInspectionDeadline] =
     useState<Date | null>(null);
   const [loading, setLoading] = useState(false);
-  const [showInsurancePicker, setShowInsurancePicker] = useState(false);
-  const [showTechInspectionPicker, setShowTechInspectionPicker] =
+  const [isInsuranceDatePickerVisible, setInsuranceDatePickerVisibility] =
+    useState(false);
+  const [isTechDatePickerVisible, setTechDatePickerVisibility] =
     useState(false);
 
   useEffect(() => {
@@ -88,21 +89,21 @@ export const TruckModal: React.FC<TruckModalProps> = ({
 
   const formatDate = (date: Date | null) => {
     if (!date) return "Not set";
-    return date.toLocaleDateString();
+    return date.toLocaleDateString("lt-LT");
   };
 
-  const handleInsuranceDateChange = (event: any, selectedDate?: Date) => {
-    setShowInsurancePicker(false);
-    if (selectedDate) {
-      setInsuranceDeadline(selectedDate);
-    }
-  };
+  const showInsuranceDatePicker = () => setInsuranceDatePickerVisibility(true);
+  const hideInsuranceDatePicker = () => setInsuranceDatePickerVisibility(false);
+  const showTechDatePicker = () => setTechDatePickerVisibility(true);
+  const hideTechDatePicker = () => setTechDatePickerVisibility(false);
 
-  const handleTechInspectionDateChange = (event: any, selectedDate?: Date) => {
-    setShowTechInspectionPicker(false);
-    if (selectedDate) {
-      setTechInspectionDeadline(selectedDate);
-    }
+  const handleInsuranceConfirm = (date: Date) => {
+    setInsuranceDeadline(date);
+    hideInsuranceDatePicker();
+  };
+  const handleTechConfirm = (date: Date) => {
+    setTechInspectionDeadline(date);
+    hideTechDatePicker();
   };
 
   const clearInsuranceDate = () => {
@@ -157,7 +158,7 @@ export const TruckModal: React.FC<TruckModalProps> = ({
             <View style={styles.dateContainer}>
               <TouchableOpacity
                 style={styles.dateButton}
-                onPress={() => setShowInsurancePicker(true)}
+                onPress={showInsuranceDatePicker}
                 disabled={loading}
               >
                 <ThemedText style={styles.dateButtonText}>
@@ -183,7 +184,7 @@ export const TruckModal: React.FC<TruckModalProps> = ({
             <View style={styles.dateContainer}>
               <TouchableOpacity
                 style={styles.dateButton}
-                onPress={() => setShowTechInspectionPicker(true)}
+                onPress={showTechDatePicker}
                 disabled={loading}
               >
                 <ThemedText style={styles.dateButtonText}>
@@ -228,25 +229,20 @@ export const TruckModal: React.FC<TruckModalProps> = ({
         </ThemedView>
       </View>
 
-      {showInsurancePicker && (
-        <DateTimePicker
-          value={insuranceDeadline || new Date()}
-          mode="date"
-          display="default"
-          onChange={handleInsuranceDateChange}
-          minimumDate={new Date()}
-        />
-      )}
-
-      {showTechInspectionPicker && (
-        <DateTimePicker
-          value={techInspectionDeadline || new Date()}
-          mode="date"
-          display="default"
-          onChange={handleTechInspectionDateChange}
-          minimumDate={new Date()}
-        />
-      )}
+      <DateTimePickerModal
+        isVisible={isInsuranceDatePickerVisible}
+        mode="date"
+        onConfirm={handleInsuranceConfirm}
+        onCancel={hideInsuranceDatePicker}
+        date={insuranceDeadline || new Date()}
+      />
+      <DateTimePickerModal
+        isVisible={isTechDatePickerVisible}
+        mode="date"
+        onConfirm={handleTechConfirm}
+        onCancel={hideTechDatePicker}
+        date={techInspectionDeadline || new Date()}
+      />
     </Modal>
   );
 };

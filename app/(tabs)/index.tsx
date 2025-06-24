@@ -223,15 +223,14 @@ export default function HomeScreen() {
             </ThemedView>
           ))
         )}
+        <TruckModal
+          visible={modalVisible}
+          onClose={handleCloseModal}
+          onSave={handleSaveTruck}
+          truck={editingTruck}
+          mode={modalMode}
+        />
       </ParallaxScrollView>
-
-      <TruckModal
-        visible={modalVisible}
-        onClose={handleCloseModal}
-        onSave={handleSaveTruck}
-        truck={editingTruck}
-        mode={modalMode}
-      />
     </>
   );
 }

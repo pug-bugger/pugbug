@@ -1,5 +1,5 @@
 import type { PropsWithChildren, ReactElement } from "react";
-import { RefreshControlProps, StyleSheet } from "react-native";
+import { Platform, RefreshControlProps, StyleSheet } from "react-native";
 import Animated, {
   interpolate,
   useAnimatedRef,
@@ -90,6 +90,7 @@ const styles = StyleSheet.create({
     padding: 32,
     gap: 16,
     overflow: "hidden",
+    ...(Platform.OS === "android" ? { paddingBottom: 100 } : {}),
   },
   headerContent: {
     position: "absolute",

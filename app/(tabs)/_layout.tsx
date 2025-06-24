@@ -2,9 +2,7 @@ import { Tabs } from "expo-router";
 import React from "react";
 import { Platform } from "react-native";
 
-import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
-import TabBarBackground from "@/components/ui/TabBarBackground";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
@@ -16,12 +14,46 @@ export default function TabLayout() {
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
         headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
+        tabBarShowLabel: false,
+        tabBarIconStyle: {
+          height: "100%",
+        },
+        tabBarItemStyle: {
+          backgroundColor: "rgba(202, 202, 202, 0.2)",
+          margin: 5,
+          borderRadius: 50,
+          height: 60,
+          width: 60,
+        },
         tabBarStyle: Platform.select({
           ios: {
-            // Use a transparent background on iOS to show the blur effect
             position: "absolute",
+            marginLeft: "20%",
+            marginRight: "20%",
+            bottom: 15,
+            borderRadius: 50,
+            height: 70,
+            backgroundColor: "rgba(255,255,255,1)",
+            borderWidth: 0,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.15,
+            shadowRadius: 16,
+            elevation: 10,
+          },
+          android: {
+            position: "absolute",
+            marginLeft: "20%",
+            marginRight: "20%",
+            bottom: 15,
+            borderRadius: 50,
+            height: 70,
+            backgroundColor: "rgba(255,255,255,1)",
+            borderWidth: 0,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.15,
+            shadowRadius: 16,
           },
           default: {},
         }),

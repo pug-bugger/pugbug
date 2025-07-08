@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useNotifications } from '../contexts/NotificationContext';
+import { CustomFieldType, DateCustomField } from '../types/Truck';
 import { useTrucks } from './useTrucks';
 
 /**
@@ -9,6 +10,22 @@ import { useTrucks } from './useTrucks';
 export const useNotificationIntegration = () => {
   const { notificationService, settings, permissionStatus } = useNotifications();
   const { trucks } = useTrucks();
+
+  // Helper function to get date custom fields from a truck
+  const getDateFields = (truck: any) => {
+    if (!truck.customFields) return [];
+    return truck.customFields.filter((field: any) => field.type === CustomFieldType.DATE) as DateCustomField[];
+  };
+
+  // Helper function to check if a date field is for insurance
+  const isInsuranceField = (field: DateCustomField) => {
+    return field.label.toLowerCase().includes('insurance');
+  };
+
+  // Helper function to check if a date field is for tech inspection
+  const isTechInspectionField = (field: DateCustomField) => {
+    return field.label.toLowerCase().includes('tech') || field.label.toLowerCase().includes('inspection');
+  };
 
   // Schedule notifications whenever trucks change
   useEffect(() => {
@@ -50,25 +67,14 @@ export const useNotificationIntegration = () => {
       const warningThreshold = settings.warningDays * 24 * 60 * 60 * 1000;
 
       return trucks.filter(truck => {
-        const deadlines = [];
+        const dateFields = getDateFields(truck);
         
-        if (truck.insuranceDeadline) {
-          const insuranceDate = new Date(truck.insuranceDeadline);
-          const timeDiff = insuranceDate.getTime() - now.getTime();
-          if (timeDiff > 0 && timeDiff <= warningThreshold) {
-            deadlines.push('insurance');
-          }
-        }
-
-        if (truck.techInspectionDeadline) {
-          const techDate = new Date(truck.techInspectionDeadline);
-          const timeDiff = techDate.getTime() - now.getTime();
-          if (timeDiff > 0 && timeDiff <= warningThreshold) {
-            deadlines.push('techInspection');
-          }
-        }
-
-        return deadlines.length > 0;
+        return dateFields.some(field => {
+          if (!field.value) return false;
+          const fieldDate = new Date(field.value);
+          const timeDiff = fieldDate.getTime() - now.getTime();
+          return timeDiff > 0 && timeDiff <= warningThreshold;
+        });
       });
     },
 
@@ -77,23 +83,13 @@ export const useNotificationIntegration = () => {
       const now = new Date();
 
       return trucks.filter(truck => {
-        const overdueDeadlines = [];
+        const dateFields = getDateFields(truck);
         
-        if (truck.insuranceDeadline) {
-          const insuranceDate = new Date(truck.insuranceDeadline);
-          if (insuranceDate.getTime() < now.getTime()) {
-            overdueDeadlines.push('insurance');
-          }
-        }
-
-        if (truck.techInspectionDeadline) {
-          const techDate = new Date(truck.techInspectionDeadline);
-          if (techDate.getTime() < now.getTime()) {
-            overdueDeadlines.push('techInspection');
-          }
-        }
-
-        return overdueDeadlines.length > 0;
+        return dateFields.some(field => {
+          if (!field.value) return false;
+          const fieldDate = new Date(field.value);
+          return fieldDate.getTime() < now.getTime();
+        });
       });
     },
 
@@ -104,26 +100,53 @@ export const useNotificationIntegration = () => {
 
       const now = new Date();
       const warningThreshold = settings.warningDays * 24 * 60 * 60 * 1000;
+      const dateFields = getDateFields(truck);
 
       const status = {
         insurance: {
-          date: truck.insuranceDeadline,
+          date: null as Date | null,
           status: 'ok' as 'ok' | 'warning' | 'overdue',
           daysUntil: 0,
         },
         techInspection: {
-          date: truck.techInspectionDeadline,
+          date: null as Date | null,
           status: 'ok' as 'ok' | 'warning' | 'overdue',
           daysUntil: 0,
         },
+        customFields: dateFields.map(field => {
+          const fieldDate = field.value ? new Date(field.value) : null;
+          let fieldStatus: 'ok' | 'warning' | 'overdue' = 'ok';
+          let daysUntil = 0;
+
+          if (fieldDate) {
+            const timeDiff = fieldDate.getTime() - now.getTime();
+            daysUntil = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+            
+            if (timeDiff < 0) {
+              fieldStatus = 'overdue';
+            } else if (timeDiff <= warningThreshold) {
+              fieldStatus = 'warning';
+            }
+          }
+
+          return {
+            id: field.id,
+            label: field.label,
+            date: fieldDate,
+            status: fieldStatus,
+            daysUntil,
+          };
+        }),
       };
 
-      // Check insurance deadline
-      if (truck.insuranceDeadline) {
-        const insuranceDate = new Date(truck.insuranceDeadline);
+      // Check for insurance deadline (backward compatibility)
+      const insuranceField = dateFields.find(isInsuranceField);
+      if (insuranceField && insuranceField.value) {
+        const insuranceDate = new Date(insuranceField.value);
         const timeDiff = insuranceDate.getTime() - now.getTime();
         const daysUntil = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
         
+        status.insurance.date = insuranceDate;
         status.insurance.daysUntil = daysUntil;
         
         if (timeDiff < 0) {
@@ -133,12 +156,14 @@ export const useNotificationIntegration = () => {
         }
       }
 
-      // Check tech inspection deadline
-      if (truck.techInspectionDeadline) {
-        const techDate = new Date(truck.techInspectionDeadline);
+      // Check for tech inspection deadline (backward compatibility)
+      const techField = dateFields.find(isTechInspectionField);
+      if (techField && techField.value) {
+        const techDate = new Date(techField.value);
         const timeDiff = techDate.getTime() - now.getTime();
         const daysUntil = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
         
+        status.techInspection.date = techDate;
         status.techInspection.daysUntil = daysUntil;
         
         if (timeDiff < 0) {
@@ -161,29 +186,25 @@ export const useNotificationIntegration = () => {
       const upcomingTrucks = trucks.filter(truck => {
         const now = new Date();
         const warningThreshold = settings.warningDays * 24 * 60 * 60 * 1000;
+        const dateFields = getDateFields(truck);
 
-        const hasUpcomingDeadline = [truck.insuranceDeadline, truck.techInspectionDeadline]
-          .some(deadline => {
-            if (!deadline) return false;
-            const deadlineDate = new Date(deadline);
-            const timeDiff = deadlineDate.getTime() - now.getTime();
-            return timeDiff > 0 && timeDiff <= warningThreshold;
-          });
-
-        return hasUpcomingDeadline;
+        return dateFields.some(field => {
+          if (!field.value) return false;
+          const fieldDate = new Date(field.value);
+          const timeDiff = fieldDate.getTime() - now.getTime();
+          return timeDiff > 0 && timeDiff <= warningThreshold;
+        });
       });
 
       const overdueTrucks = trucks.filter(truck => {
         const now = new Date();
+        const dateFields = getDateFields(truck);
 
-        const hasOverdueDeadline = [truck.insuranceDeadline, truck.techInspectionDeadline]
-          .some(deadline => {
-            if (!deadline) return false;
-            const deadlineDate = new Date(deadline);
-            return deadlineDate.getTime() < now.getTime();
-          });
-
-        return hasOverdueDeadline;
+        return dateFields.some(field => {
+          if (!field.value) return false;
+          const fieldDate = new Date(field.value);
+          return fieldDate.getTime() < now.getTime();
+        });
       });
 
       return {

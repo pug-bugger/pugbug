@@ -2,7 +2,7 @@ import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import * as TaskManager from 'expo-task-manager';
 import { Platform } from 'react-native';
-import { Truck } from '../types/Truck';
+import { CustomFieldType, DateCustomField, Truck } from '../types/Truck';
 import AsyncStorageService from './AsyncStorageService';
 
 // Background task identifier
@@ -265,33 +265,66 @@ class NotificationService {
     return trucks.map(truck => {
       const deadlines: Array<{type: string, date: string, daysUntil: number}> = [];
 
-      // Check insurance deadline
-      if (truck.insuranceDeadline) {
-        const insuranceDate = new Date(truck.insuranceDeadline);
-        const timeDiff = insuranceDate.getTime() - now.getTime();
-        const daysUntil = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+      // Check custom date fields
+      if (truck.customFields) {
+        const dateFields = truck.customFields.filter((field: any) => field.type === CustomFieldType.DATE) as DateCustomField[];
         
-        if (timeDiff > 0 && timeDiff <= warningThreshold) {
-          deadlines.push({
-            type: 'Insurance',
-            date: truck.insuranceDeadline,
-            daysUntil,
-          });
+        dateFields.forEach(field => {
+          if (field.value) {
+            const fieldDate = new Date(field.value);
+            const timeDiff = fieldDate.getTime() - now.getTime();
+            const daysUntil = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+            
+            if (timeDiff > 0 && timeDiff <= warningThreshold) {
+              deadlines.push({
+                type: field.label,
+                date: fieldDate.toISOString(),
+                daysUntil,
+              });
+            }
+          }
+        });
+      }
+
+      // Legacy support: Check old deadline fields if they exist and aren't already covered by custom fields
+      if ('insuranceDeadline' in truck && truck.insuranceDeadline && typeof truck.insuranceDeadline === 'string') {
+        const hasInsuranceField = truck.customFields?.some((field: any) => 
+          field.type === CustomFieldType.DATE && field.label.toLowerCase().includes('insurance')
+        );
+        
+        if (!hasInsuranceField) {
+          const insuranceDate = new Date(truck.insuranceDeadline);
+          const timeDiff = insuranceDate.getTime() - now.getTime();
+          const daysUntil = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+          
+          if (timeDiff > 0 && timeDiff <= warningThreshold) {
+            deadlines.push({
+              type: 'Insurance',
+              date: truck.insuranceDeadline,
+              daysUntil,
+            });
+          }
         }
       }
 
-      // Check tech inspection deadline
-      if (truck.techInspectionDeadline) {
-        const techDate = new Date(truck.techInspectionDeadline);
-        const timeDiff = techDate.getTime() - now.getTime();
-        const daysUntil = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+      if ('techInspectionDeadline' in truck && truck.techInspectionDeadline && typeof truck.techInspectionDeadline === 'string') {
+        const hasTechField = truck.customFields?.some((field: any) => 
+          field.type === CustomFieldType.DATE && 
+          (field.label.toLowerCase().includes('tech') || field.label.toLowerCase().includes('inspection'))
+        );
         
-        if (timeDiff > 0 && timeDiff <= warningThreshold) {
-          deadlines.push({
-            type: 'Tech Inspection',
-            date: truck.techInspectionDeadline,
-            daysUntil,
-          });
+        if (!hasTechField) {
+          const techDate = new Date(truck.techInspectionDeadline);
+          const timeDiff = techDate.getTime() - now.getTime();
+          const daysUntil = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+          
+          if (timeDiff > 0 && timeDiff <= warningThreshold) {
+            deadlines.push({
+              type: 'Tech Inspection',
+              date: truck.techInspectionDeadline,
+              daysUntil,
+            });
+          }
         }
       }
 

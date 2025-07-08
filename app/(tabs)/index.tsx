@@ -16,7 +16,17 @@ import { IconSymbol } from "@/components/ui/IconSymbol";
 import { Menu } from "@/components/ui/Menu";
 import { useNotificationIntegration } from "@/hooks/useNotificationIntegration";
 import { useTrucks } from "@/hooks/useTrucks";
-import { CreateTruckData, Truck, UpdateTruckData } from "@/types/Truck";
+import {
+  BooleanCustomField,
+  CreateTruckData,
+  CustomField,
+  CustomFieldType,
+  DateCustomField,
+  NumberCustomField,
+  TextCustomField,
+  Truck,
+  UpdateTruckData,
+} from "@/types/Truck";
 
 export default function HomeScreen() {
   const {
@@ -88,69 +98,106 @@ export default function HomeScreen() {
     }
   };
 
-  const formatDeadline = (deadline: string | null) => {
-    if (!deadline) return "Not set";
-    const date = new Date(deadline);
-    return date.toLocaleDateString("lt-LT");
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("lt-LT");
-  };
-
-  const getDeadlineStyle = (deadline: string | null, truckId: string) => {
-    if (!deadline) return styles.deadlineText;
-
-    const status = getTruckDeadlineStatus(truckId);
-    if (!status) return styles.deadlineText;
-
-    const insuranceStatus =
-      status.insurance.date === deadline ? status.insurance.status : null;
-    const techStatus =
-      status.techInspection.date === deadline
-        ? status.techInspection.status
-        : null;
-    const currentStatus = insuranceStatus || techStatus;
-
-    switch (currentStatus) {
-      case "overdue":
-        return styles.overdueText;
-      case "warning":
-        return styles.upcomingText;
+  const formatFieldValue = (field: CustomField) => {
+    switch (field.type) {
+      case CustomFieldType.DATE:
+        const dateField = field as DateCustomField;
+        if (!dateField.value) return "Not set";
+        return new Date(dateField.value).toLocaleDateString("lt-LT");
+      case CustomFieldType.TEXT:
+        const textField = field as TextCustomField;
+        return textField.value || "Not set";
+      case CustomFieldType.NUMBER:
+        const numberField = field as NumberCustomField;
+        return numberField.value?.toString() || "Not set";
+      case CustomFieldType.BOOLEAN:
+        const booleanField = field as BooleanCustomField;
+        return booleanField.value ? "Yes" : "No";
       default:
-        return styles.deadlineText;
+        return "Not set";
     }
   };
 
-  const getDeadlineIcon = (deadline: string | null, truckId: string) => {
-    if (!deadline) return null;
+  const formatDate = (date: Date | string) => {
+    if (typeof date === "string") {
+      return new Date(date).toLocaleDateString("lt-LT");
+    }
+    return date.toLocaleDateString("lt-LT");
+  };
+
+  const getFieldStyle = (field: CustomField, truckId: string) => {
+    if (field.type !== CustomFieldType.DATE || !field.value)
+      return styles.fieldValue;
+
+    const status = getTruckDeadlineStatus(truckId);
+    if (!status) return styles.fieldValue;
+
+    // Check if this field matches any of the custom fields status
+    const customFieldStatus = status.customFields.find(
+      (cf) => cf.id === field.id
+    );
+    if (customFieldStatus) {
+      switch (customFieldStatus.status) {
+        case "overdue":
+          return styles.overdueText;
+        case "warning":
+          return styles.upcomingText;
+        default:
+          return styles.fieldValue;
+      }
+    }
+
+    return styles.fieldValue;
+  };
+
+  const getFieldIcon = (field: CustomField, truckId: string) => {
+    if (field.type !== CustomFieldType.DATE || !field.value) return null;
 
     const status = getTruckDeadlineStatus(truckId);
     if (!status) return null;
 
-    const insuranceStatus =
-      status.insurance.date === deadline ? status.insurance.status : null;
-    const techStatus =
-      status.techInspection.date === deadline
-        ? status.techInspection.status
-        : null;
-    const currentStatus = insuranceStatus || techStatus;
+    // Check if this field matches any of the custom fields status
+    const customFieldStatus = status.customFields.find(
+      (cf) => cf.id === field.id
+    );
+    if (customFieldStatus) {
+      switch (customFieldStatus.status) {
+        case "overdue":
+          return (
+            <IconSymbol
+              name="exclamationmark.triangle.fill"
+              size={16}
+              color="#dc3545"
+            />
+          );
+        case "warning":
+          return <IconSymbol name="clock.fill" size={16} color="#ffc107" />;
+        default:
+          return (
+            <IconSymbol
+              name="checkmark.circle.fill"
+              size={16}
+              color="#28a745"
+            />
+          );
+      }
+    }
 
-    switch (currentStatus) {
-      case "overdue":
-        return (
-          <IconSymbol
-            name="exclamationmark.triangle.fill"
-            size={16}
-            color="#dc3545"
-          />
-        );
-      case "warning":
-        return <IconSymbol name="clock.fill" size={16} color="#ffc107" />;
+    return null;
+  };
+
+  const getFieldTypeIcon = (fieldType: CustomFieldType) => {
+    switch (fieldType) {
+      case CustomFieldType.DATE:
+        return "📅";
+      case CustomFieldType.TEXT:
+        return "📝";
+      case CustomFieldType.NUMBER:
+        return "🔢";
+      case CustomFieldType.BOOLEAN:
+        return "✅";
       default:
-        return (
-          <IconSymbol name="checkmark.circle.fill" size={16} color="#28a745" />
-        );
+        return "📋";
     }
   };
 
@@ -272,47 +319,44 @@ export default function HomeScreen() {
 
               <ThemedText style={styles.truckNote}>{truck.note}</ThemedText>
 
-              <ThemedView style={styles.deadlinesContainer}>
-                <ThemedView style={styles.deadlineItem}>
-                  <ThemedText style={styles.deadlineLabel}>
-                    Insurance:
-                  </ThemedText>
-                  <View style={styles.deadlineValueContainer}>
-                    {getDeadlineIcon(truck.insuranceDeadline, truck.id)}
-                    <ThemedText
-                      style={getDeadlineStyle(
-                        truck.insuranceDeadline,
-                        truck.id
-                      )}
-                    >
-                      {formatDeadline(truck.insuranceDeadline)}
-                    </ThemedText>
-                  </View>
+              {/* Custom Fields Display */}
+              {truck.customFields && truck.customFields.length > 0 && (
+                <ThemedView style={styles.customFieldsContainer}>
+                  {truck.customFields.map((field) => (
+                    <ThemedView key={field.id} style={styles.fieldItem}>
+                      <ThemedView style={styles.fieldHeader}>
+                        <ThemedText style={styles.fieldTypeIcon}>
+                          {getFieldTypeIcon(field.type)}
+                        </ThemedText>
+                        <ThemedText style={styles.fieldLabel}>
+                          {field.label}:
+                        </ThemedText>
+                      </ThemedView>
+                      <View style={styles.fieldValueContainer}>
+                        {getFieldIcon(field, truck.id)}
+                        <ThemedText style={getFieldStyle(field, truck.id)}>
+                          {formatFieldValue(field)}
+                        </ThemedText>
+                      </View>
+                    </ThemedView>
+                  ))}
                 </ThemedView>
+              )}
 
-                <ThemedView style={styles.deadlineItem}>
-                  <ThemedText style={styles.deadlineLabel}>
-                    Tech Inspection:
+              {/* Show message if no custom fields */}
+              {(!truck.customFields || truck.customFields.length === 0) && (
+                <ThemedView style={styles.noFieldsContainer}>
+                  <ThemedText style={styles.noFieldsText}>
+                    No custom fields added. Edit truck to add fields.
                   </ThemedText>
-                  <View style={styles.deadlineValueContainer}>
-                    {getDeadlineIcon(truck.techInspectionDeadline, truck.id)}
-                    <ThemedText
-                      style={getDeadlineStyle(
-                        truck.techInspectionDeadline,
-                        truck.id
-                      )}
-                    >
-                      {formatDeadline(truck.techInspectionDeadline)}
-                    </ThemedText>
-                  </View>
                 </ThemedView>
-              </ThemedView>
+              )}
 
               <ThemedView style={styles.truckMeta}>
                 <ThemedText style={styles.metaText}>
                   Created: {formatDate(truck.createdAt)}
                 </ThemedText>
-                {truck.updatedAt !== truck.createdAt && (
+                {truck.updatedAt.getTime() !== truck.createdAt.getTime() && (
                   <ThemedText style={styles.metaText}>
                     Updated: {formatDate(truck.updatedAt)}
                   </ThemedText>
@@ -373,6 +417,67 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
     color: "#666",
   },
+  customFieldsContainer: {
+    gap: 6,
+    marginTop: 8,
+  },
+  fieldItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    backgroundColor: "#f8f9fa",
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "#e9ecef",
+  },
+  fieldHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    flex: 1,
+  },
+  fieldTypeIcon: {
+    fontSize: 16,
+  },
+  fieldLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#333",
+  },
+  fieldValueContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  fieldValue: {
+    fontSize: 14,
+    color: "#28a745",
+  },
+  overdueText: {
+    fontSize: 14,
+    color: "#dc3545",
+    fontWeight: "600",
+  },
+  upcomingText: {
+    fontSize: 14,
+    color: "#ffc107",
+    fontWeight: "600",
+  },
+  noFieldsContainer: {
+    padding: 12,
+    backgroundColor: "#f8f9fa",
+    borderRadius: 8,
+    marginTop: 8,
+  },
+  noFieldsText: {
+    fontSize: 14,
+    color: "#6c757d",
+    fontStyle: "italic",
+    textAlign: "center",
+  },
+  // Legacy styles for deadline display (keeping for backward compatibility)
   deadlinesContainer: {
     gap: 4,
     marginTop: 8,
@@ -395,16 +500,6 @@ const styles = StyleSheet.create({
   deadlineText: {
     fontSize: 14,
     color: "#28a745",
-  },
-  overdueText: {
-    fontSize: 14,
-    color: "#dc3545",
-    fontWeight: "600",
-  },
-  upcomingText: {
-    fontSize: 14,
-    color: "#ffc107",
-    fontWeight: "600",
   },
   truckMeta: {
     flexDirection: "row",

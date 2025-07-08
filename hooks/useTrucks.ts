@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import AsyncStorageService from '../services/AsyncStorageService';
-import { CreateTruckData, Truck, UpdateTruckData } from '../types/Truck';
+import { CreateTruckData, CustomFieldType, Truck, UpdateTruckData } from '../types/Truck';
 
 const TRUCKS_STORAGE_KEY = 'trucks';
 
@@ -17,7 +17,51 @@ export const useTrucks = () => {
       setLoading(true);
       setError(null);
       const storedTrucks = await truckService.load(TRUCKS_STORAGE_KEY);
-      setTrucks(storedTrucks || []);
+      
+      // Migrate old truck data to new format
+      const migratedTrucks = (storedTrucks || []).map(truck => {
+        // Convert old deadline fields to custom fields if they exist
+        const customFields = truck.customFields || [];
+        
+        // Add insurance deadline if it exists and not already in custom fields
+        if ('insuranceDeadline' in truck && truck.insuranceDeadline && typeof truck.insuranceDeadline === 'string') {
+          const hasInsuranceField = customFields.some(field => 
+            field.label === 'Insurance Deadline'
+          );
+          if (!hasInsuranceField) {
+            customFields.push({
+              id: `migrated_insurance_${truck.id}`,
+              type: CustomFieldType.DATE,
+              label: 'Insurance Deadline',
+              value: new Date(truck.insuranceDeadline),
+            });
+          }
+        }
+        
+        // Add tech inspection deadline if it exists and not already in custom fields
+        if ('techInspectionDeadline' in truck && truck.techInspectionDeadline && typeof truck.techInspectionDeadline === 'string') {
+          const hasTechField = customFields.some(field => 
+            field.label === 'Tech Inspection Deadline'
+          );
+          if (!hasTechField) {
+            customFields.push({
+              id: `migrated_tech_${truck.id}`,
+              type: CustomFieldType.DATE,
+              label: 'Tech Inspection Deadline',
+              value: new Date(truck.techInspectionDeadline),
+            });
+          }
+        }
+        
+        return {
+          ...truck,
+          createdAt: typeof truck.createdAt === 'string' ? new Date(truck.createdAt) : truck.createdAt,
+          updatedAt: typeof truck.updatedAt === 'string' ? new Date(truck.updatedAt) : truck.updatedAt,
+          customFields,
+        };
+      });
+      
+      setTrucks(migratedTrucks);
     } catch (err) {
       setError('Failed to load trucks');
       console.error('Error loading trucks:', err);
@@ -44,8 +88,8 @@ export const useTrucks = () => {
       const newTruck: Truck = {
         id: Date.now().toString(), // Simple ID generation
         ...truckData,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
 
       const updatedTrucks = [...trucks, newTruck];
@@ -66,7 +110,7 @@ export const useTrucks = () => {
           ? { 
               ...truck, 
               ...updates, 
-              updatedAt: new Date().toISOString() 
+              updatedAt: new Date() 
             }
           : truck
       );

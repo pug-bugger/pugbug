@@ -1,23 +1,44 @@
+// Custom Field Types
+export enum CustomFieldType {
+  DATE = 'DATE',
+  TEXT = 'TEXT',
+  NUMBER = 'NUMBER',
+  BOOLEAN = 'BOOLEAN'
+}
+
+export interface BaseCustomField<T extends CustomFieldType, V> {
+  id: string;
+  type: T;
+  label: string;
+  value: V;
+}
+
+// Specific custom field implementations
+export interface DateCustomField extends BaseCustomField<CustomFieldType.DATE, Date | null> {}
+export interface TextCustomField extends BaseCustomField<CustomFieldType.TEXT, string> {}
+export interface NumberCustomField extends BaseCustomField<CustomFieldType.NUMBER, number | null> {}
+export interface BooleanCustomField extends BaseCustomField<CustomFieldType.BOOLEAN, boolean> {}
+
+// Union type for all custom fields
+export type CustomField = DateCustomField | TextCustomField | NumberCustomField | BooleanCustomField;
+
 export interface Truck {
   id: string;
   name: string;
   note: string;
-  insuranceDeadline: string | null;
-  techInspectionDeadline: string | null;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
+  customFields: CustomField[];
 }
 
 export interface CreateTruckData {
   name: string;
   note: string;
-  insuranceDeadline: string | null;
-  techInspectionDeadline: string | null;
+  customFields: CustomField[];
 }
 
 export interface UpdateTruckData {
   name?: string;
   note?: string;
-  insuranceDeadline?: string | null;
-  techInspectionDeadline?: string | null;
+  customFields?: CustomField[];
 } 

@@ -5,6 +5,7 @@ import {
   Pressable,
   RefreshControl,
   StyleSheet,
+  View,
 } from "react-native";
 
 import ParallaxScrollView from "@/components/ParallaxScrollView";
@@ -13,6 +14,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { TruckModal } from "@/components/TruckModal";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { Menu } from "@/components/ui/Menu";
+import { useNotificationIntegration } from "@/hooks/useNotificationIntegration";
 import { useTrucks } from "@/hooks/useTrucks";
 import { CreateTruckData, Truck, UpdateTruckData } from "@/types/Truck";
 
@@ -26,6 +28,14 @@ export default function HomeScreen() {
     deleteTruck,
     refreshTrucks,
   } = useTrucks();
+
+  const {
+    getTrucksWithUpcomingDeadlines,
+    getTrucksWithOverdueDeadlines,
+    getTruckDeadlineStatus,
+    isNotificationSetupComplete,
+    getNotificationSummary,
+  } = useNotificationIntegration();
 
   const [modalVisible, setModalVisible] = useState(false);
   const [editingTruck, setEditingTruck] = useState<Truck | null>(null);
@@ -68,56 +78,130 @@ export default function HomeScreen() {
     try {
       if (modalMode === "add") {
         await addTruck(data as CreateTruckData);
-      } else if (modalMode === "edit" && editingTruck) {
+      } else if (editingTruck) {
         await updateTruck(editingTruck.id, data as UpdateTruckData);
       }
+      setModalVisible(false);
+      setEditingTruck(null);
     } catch (error) {
       Alert.alert("Error", "Failed to save truck");
     }
   };
 
-  const handleCloseModal = () => {
-    setModalVisible(false);
-    setEditingTruck(null);
+  const formatDeadline = (deadline: string | null) => {
+    if (!deadline) return "Not set";
+    const date = new Date(deadline);
+    return date.toLocaleDateString("lt-LT");
   };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("lt-LT");
   };
 
-  const formatDeadline = (dateString: string | null) => {
-    if (!dateString) return "Not set";
-    return new Date(dateString).toLocaleDateString("lt-LT");
-  };
+  const getDeadlineStyle = (deadline: string | null, truckId: string) => {
+    if (!deadline) return styles.deadlineText;
 
-  const isOverdue = (dateString: string | null) => {
-    if (!dateString) return false;
-    return new Date(dateString) < new Date();
-  };
+    const status = getTruckDeadlineStatus(truckId);
+    if (!status) return styles.deadlineText;
 
-  const isUpcoming = (dateString: string | null) => {
-    if (!dateString) return false;
-    const deadline = new Date(dateString);
-    const now = new Date();
-    const thirtyDaysFromNow = new Date();
-    thirtyDaysFromNow.setDate(now.getDate() + 30);
-    return deadline <= thirtyDaysFromNow && deadline > now;
-  };
+    const insuranceStatus =
+      status.insurance.date === deadline ? status.insurance.status : null;
+    const techStatus =
+      status.techInspection.date === deadline
+        ? status.techInspection.status
+        : null;
+    const currentStatus = insuranceStatus || techStatus;
 
-  const getDeadlineStyle = (dateString: string | null) => {
-    if (isOverdue(dateString)) {
-      return styles.overdueText;
-    } else if (isUpcoming(dateString)) {
-      return styles.upcomingText;
+    switch (currentStatus) {
+      case "overdue":
+        return styles.overdueText;
+      case "warning":
+        return styles.upcomingText;
+      default:
+        return styles.deadlineText;
     }
-    return styles.deadlineText;
   };
+
+  const getDeadlineIcon = (deadline: string | null, truckId: string) => {
+    if (!deadline) return null;
+
+    const status = getTruckDeadlineStatus(truckId);
+    if (!status) return null;
+
+    const insuranceStatus =
+      status.insurance.date === deadline ? status.insurance.status : null;
+    const techStatus =
+      status.techInspection.date === deadline
+        ? status.techInspection.status
+        : null;
+    const currentStatus = insuranceStatus || techStatus;
+
+    switch (currentStatus) {
+      case "overdue":
+        return (
+          <IconSymbol
+            name="exclamationmark.triangle.fill"
+            size={16}
+            color="#dc3545"
+          />
+        );
+      case "warning":
+        return <IconSymbol name="clock.fill" size={16} color="#ffc107" />;
+      default:
+        return (
+          <IconSymbol name="checkmark.circle.fill" size={16} color="#28a745" />
+        );
+    }
+  };
+
+  // Get notification summary for header
+  const notificationSummary = getNotificationSummary();
+  const trucksWithUpcomingDeadlines = getTrucksWithUpcomingDeadlines();
+  const trucksWithOverdueDeadlines = getTrucksWithOverdueDeadlines();
 
   const headerContent = (
     <ThemedView style={styles.headerContent}>
       <ThemedText style={styles.headerContentText} type="title">
         My Trucks
       </ThemedText>
+
+      {/* Notification Status */}
+      {!isNotificationSetupComplete() && (
+        <ThemedView style={styles.notificationWarning}>
+          <IconSymbol name="bell.slash" size={16} color="#ffc107" />
+          <ThemedText style={styles.notificationWarningText}>
+            Notifications disabled
+          </ThemedText>
+        </ThemedView>
+      )}
+
+      {/* Deadline Summary */}
+      {(trucksWithUpcomingDeadlines.length > 0 ||
+        trucksWithOverdueDeadlines.length > 0) && (
+        <ThemedView style={styles.deadlineSummary}>
+          {trucksWithOverdueDeadlines.length > 0 && (
+            <ThemedView style={styles.deadlineBadge}>
+              <IconSymbol
+                name="exclamationmark.triangle.fill"
+                size={14}
+                color="#dc3545"
+              />
+              <ThemedText style={styles.deadlineBadgeText}>
+                {trucksWithOverdueDeadlines.length} overdue
+              </ThemedText>
+            </ThemedView>
+          )}
+          {trucksWithUpcomingDeadlines.length > 0 && (
+            <ThemedView style={styles.deadlineBadge}>
+              <IconSymbol name="clock.fill" size={14} color="#ffc107" />
+              <ThemedText style={styles.deadlineBadgeText}>
+                {trucksWithUpcomingDeadlines.length} upcoming
+              </ThemedText>
+            </ThemedView>
+          )}
+        </ThemedView>
+      )}
+
       <ThemedView
         style={{
           position: "absolute",
@@ -193,20 +277,34 @@ export default function HomeScreen() {
                   <ThemedText style={styles.deadlineLabel}>
                     Insurance:
                   </ThemedText>
-                  <ThemedText style={getDeadlineStyle(truck.insuranceDeadline)}>
-                    {formatDeadline(truck.insuranceDeadline)}
-                  </ThemedText>
+                  <View style={styles.deadlineValueContainer}>
+                    {getDeadlineIcon(truck.insuranceDeadline, truck.id)}
+                    <ThemedText
+                      style={getDeadlineStyle(
+                        truck.insuranceDeadline,
+                        truck.id
+                      )}
+                    >
+                      {formatDeadline(truck.insuranceDeadline)}
+                    </ThemedText>
+                  </View>
                 </ThemedView>
 
                 <ThemedView style={styles.deadlineItem}>
                   <ThemedText style={styles.deadlineLabel}>
                     Tech Inspection:
                   </ThemedText>
-                  <ThemedText
-                    style={getDeadlineStyle(truck.techInspectionDeadline)}
-                  >
-                    {formatDeadline(truck.techInspectionDeadline)}
-                  </ThemedText>
+                  <View style={styles.deadlineValueContainer}>
+                    {getDeadlineIcon(truck.techInspectionDeadline, truck.id)}
+                    <ThemedText
+                      style={getDeadlineStyle(
+                        truck.techInspectionDeadline,
+                        truck.id
+                      )}
+                    >
+                      {formatDeadline(truck.techInspectionDeadline)}
+                    </ThemedText>
+                  </View>
                 </ThemedView>
               </ThemedView>
 
@@ -225,10 +323,13 @@ export default function HomeScreen() {
         )}
         <TruckModal
           visible={modalVisible}
-          onClose={handleCloseModal}
-          onSave={handleSaveTruck}
-          truck={editingTruck}
           mode={modalMode}
+          truck={editingTruck}
+          onClose={() => {
+            setModalVisible(false);
+            setEditingTruck(null);
+          }}
+          onSave={handleSaveTruck}
         />
       </ParallaxScrollView>
     </>
@@ -286,6 +387,11 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#333",
   },
+  deadlineValueContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
   deadlineText: {
     fontSize: 14,
     color: "#28a745",
@@ -340,13 +446,50 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     left: 0,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    backgroundColor: "transparent",
-    width: "100%",
+    right: 0,
+    padding: 24,
   },
   headerContentText: {
-    color: "rgba(255, 255, 255, 0.7)",
-    fontSize: 32,
+    color: "white",
+    fontSize: 28,
+    fontWeight: "bold",
+    textShadowColor: "rgba(0, 0, 0, 0.3)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
+  notificationWarning: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 4,
+    backgroundColor: "rgba(255, 193, 7, 0.2)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    alignSelf: "flex-start",
+  },
+  notificationWarningText: {
+    color: "#ffc107",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  deadlineSummary: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 8,
+  },
+  deadlineBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  deadlineBadgeText: {
+    color: "white",
+    fontSize: 12,
+    fontWeight: "600",
   },
 });

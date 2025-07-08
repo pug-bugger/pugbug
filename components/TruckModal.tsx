@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import {
   Alert,
   Modal,
+  Platform,
+  ScrollView,
   StyleSheet,
   TextInput,
   TouchableOpacity,
@@ -101,6 +103,7 @@ export const TruckModal: React.FC<TruckModalProps> = ({
     setInsuranceDeadline(date);
     hideInsuranceDatePicker();
   };
+
   const handleTechConfirm = (date: Date) => {
     setTechInspectionDeadline(date);
     hideTechDatePicker();
@@ -123,109 +126,130 @@ export const TruckModal: React.FC<TruckModalProps> = ({
     >
       <View style={styles.overlay}>
         <ThemedView style={styles.modalContent}>
-          <ThemedText type="title" style={styles.modalTitle}>
-            {mode === "add" ? "Add New Truck" : "Edit Truck"}
-          </ThemedText>
-
-          <View style={styles.inputContainer}>
-            <ThemedText style={styles.label}>Truck Name *</ThemedText>
-            <TextInput
-              style={styles.input}
-              value={name}
-              onChangeText={setName}
-              placeholder="Enter truck name"
-              placeholderTextColor="#999"
-              editable={!loading}
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <ThemedText style={styles.label}>Note</ThemedText>
-            <TextInput
-              style={[styles.input, styles.textArea]}
-              value={note}
-              onChangeText={setNote}
-              placeholder="Enter truck note (optional)"
-              placeholderTextColor="#999"
-              multiline
-              numberOfLines={3}
-              editable={!loading}
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <ThemedText style={styles.label}>Insurance Deadline</ThemedText>
-            <View style={styles.dateContainer}>
-              <TouchableOpacity
-                style={styles.dateButton}
-                onPress={showInsuranceDatePicker}
-                disabled={loading}
-              >
-                <ThemedText style={styles.dateButtonText}>
-                  {formatDate(insuranceDeadline)}
-                </ThemedText>
-              </TouchableOpacity>
-              {insuranceDeadline && (
-                <TouchableOpacity
-                  style={styles.clearButton}
-                  onPress={clearInsuranceDate}
-                  disabled={loading}
-                >
-                  <ThemedText style={styles.clearButtonText}>Clear</ThemedText>
-                </TouchableOpacity>
-              )}
-            </View>
-          </View>
-
-          <View style={styles.inputContainer}>
-            <ThemedText style={styles.label}>
-              Tech Inspection Deadline
+          <ScrollView
+            // style={styles.scrollContainer}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            <ThemedText type="title" style={styles.modalTitle}>
+              {mode === "add" ? "Add New Truck" : "Edit Truck"}
             </ThemedText>
-            <View style={styles.dateContainer}>
+
+            <View style={styles.inputContainer}>
+              <ThemedText style={styles.label}>Truck Name *</ThemedText>
+              <TextInput
+                style={styles.input}
+                value={name}
+                onChangeText={setName}
+                placeholder="Enter truck name"
+                placeholderTextColor="#999"
+                editable={!loading}
+                autoCapitalize="words"
+                returnKeyType="next"
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <ThemedText style={styles.label}>Note</ThemedText>
+              <TextInput
+                style={[styles.input, styles.textArea]}
+                value={note}
+                onChangeText={setNote}
+                placeholder="Enter truck note (optional)"
+                placeholderTextColor="#999"
+                multiline
+                numberOfLines={Platform.OS === "android" ? 4 : 3}
+                editable={!loading}
+                textAlignVertical="top"
+                returnKeyType="done"
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <ThemedText style={styles.label}>Insurance Deadline</ThemedText>
+              <View style={styles.dateContainer}>
+                <TouchableOpacity
+                  style={styles.dateButton}
+                  onPress={showInsuranceDatePicker}
+                  disabled={loading}
+                  activeOpacity={0.7}
+                >
+                  <ThemedText style={styles.dateButtonText}>
+                    {formatDate(insuranceDeadline)}
+                  </ThemedText>
+                </TouchableOpacity>
+                {insuranceDeadline && (
+                  <TouchableOpacity
+                    style={styles.clearButton}
+                    onPress={clearInsuranceDate}
+                    disabled={loading}
+                    activeOpacity={0.7}
+                  >
+                    <ThemedText style={styles.clearButtonText}>
+                      Clear
+                    </ThemedText>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+
+            <View style={styles.inputContainer}>
+              <ThemedText style={styles.label}>
+                Tech Inspection Deadline
+              </ThemedText>
+              <View style={styles.dateContainer}>
+                <TouchableOpacity
+                  style={styles.dateButton}
+                  onPress={showTechDatePicker}
+                  disabled={loading}
+                  activeOpacity={0.7}
+                >
+                  <ThemedText style={styles.dateButtonText}>
+                    {formatDate(techInspectionDeadline)}
+                  </ThemedText>
+                </TouchableOpacity>
+                {techInspectionDeadline && (
+                  <TouchableOpacity
+                    style={styles.clearButton}
+                    onPress={clearTechInspectionDate}
+                    disabled={loading}
+                    activeOpacity={0.7}
+                  >
+                    <ThemedText style={styles.clearButtonText}>
+                      Clear
+                    </ThemedText>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+
+            <View style={styles.buttonContainer}>
               <TouchableOpacity
-                style={styles.dateButton}
-                onPress={showTechDatePicker}
+                style={[styles.button, styles.cancelButton]}
+                onPress={handleCancel}
                 disabled={loading}
+                activeOpacity={0.7}
               >
-                <ThemedText style={styles.dateButtonText}>
-                  {formatDate(techInspectionDeadline)}
+                <ThemedText style={styles.buttonText}>Cancel</ThemedText>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.button,
+                  styles.saveButton,
+                  loading && styles.disabledButton,
+                ]}
+                onPress={handleSave}
+                disabled={loading}
+                activeOpacity={0.7}
+              >
+                <ThemedText style={styles.buttonText}>
+                  {loading ? "Saving..." : "Save"}
                 </ThemedText>
               </TouchableOpacity>
-              {techInspectionDeadline && (
-                <TouchableOpacity
-                  style={styles.clearButton}
-                  onPress={clearTechInspectionDate}
-                  disabled={loading}
-                >
-                  <ThemedText style={styles.clearButtonText}>Clear</ThemedText>
-                </TouchableOpacity>
-              )}
             </View>
-          </View>
-
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={[styles.button, styles.cancelButton]}
-              onPress={handleCancel}
-              disabled={loading}
-            >
-              <ThemedText style={styles.buttonText}>Cancel</ThemedText>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.button,
-                styles.saveButton,
-                loading && styles.disabledButton,
-              ]}
-              onPress={handleSave}
-              disabled={loading}
-            >
-              <ThemedText style={styles.buttonText}>
-                {loading ? "Saving..." : "Save"}
-              </ThemedText>
-            </TouchableOpacity>
-          </View>
+          </ScrollView>
         </ThemedView>
       </View>
 
@@ -235,6 +259,7 @@ export const TruckModal: React.FC<TruckModalProps> = ({
         onConfirm={handleInsuranceConfirm}
         onCancel={hideInsuranceDatePicker}
         date={insuranceDeadline || new Date()}
+        minimumDate={new Date()}
       />
       <DateTimePickerModal
         isVisible={isTechDatePickerVisible}
@@ -242,6 +267,7 @@ export const TruckModal: React.FC<TruckModalProps> = ({
         onConfirm={handleTechConfirm}
         onCancel={hideTechDatePicker}
         date={techInspectionDeadline || new Date()}
+        minimumDate={new Date()}
       />
     </Modal>
   );
@@ -253,11 +279,13 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     justifyContent: "center",
     alignItems: "center",
+    paddingHorizontal: 20,
   },
   modalContent: {
-    width: "90%",
+    width: "100%",
     maxWidth: 400,
-    padding: 20,
+    maxHeight: "80%",
+    minHeight: "50%",
     borderRadius: 15,
     shadowOpacity: 0.3,
     shadowColor: "#000",
@@ -265,51 +293,63 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 8,
   },
+  scrollContent: {
+    padding: 20,
+  },
   modalTitle: {
     textAlign: "center",
     marginBottom: 20,
+    fontSize: 20,
+    fontWeight: "bold",
   },
   inputContainer: {
-    marginBottom: 15,
+    marginBottom: 20,
   },
   label: {
-    marginBottom: 5,
+    marginBottom: 8,
     fontWeight: "600",
+    fontSize: 16,
+    color: "#333",
   },
   input: {
     borderWidth: 1,
     borderColor: "#ddd",
     borderRadius: 8,
-    padding: 12,
+    padding: 14,
     fontSize: 16,
     backgroundColor: "#fff",
+    minHeight: Platform.OS === "android" ? 50 : 44,
   },
   textArea: {
-    height: 80,
+    height: Platform.OS === "android" ? 100 : 80,
     textAlignVertical: "top",
   },
   dateContainer: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
+    gap: 12,
   },
   dateButton: {
     flex: 1,
     borderWidth: 1,
     borderColor: "#ddd",
     borderRadius: 8,
-    padding: 12,
+    padding: 14,
     backgroundColor: "#fff",
+    minHeight: Platform.OS === "android" ? 50 : 44,
+    justifyContent: "center",
   },
   dateButtonText: {
     fontSize: 16,
     color: "#333",
   },
   clearButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
     backgroundColor: "#dc3545",
     borderRadius: 6,
+    minHeight: Platform.OS === "android" ? 40 : 36,
+    justifyContent: "center",
   },
   clearButtonText: {
     color: "white",
@@ -319,14 +359,17 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    gap: 10,
-    marginTop: 10,
+    gap: 12,
+    marginTop: 20,
   },
   button: {
     flex: 1,
-    padding: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
     borderRadius: 8,
     alignItems: "center",
+    justifyContent: "center",
+    minHeight: Platform.OS === "android" ? 50 : 44,
   },
   cancelButton: {
     backgroundColor: "#6c757d",

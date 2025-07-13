@@ -42,3 +42,31 @@ export interface UpdateTruckData {
   note?: string;
   customFields?: CustomField[];
 } 
+
+export const FIELD_TEMPLATES = [
+  {
+    label: "Insurance Deadline",
+    type: CustomFieldType.DATE,
+    icon: "📅",
+  },
+  {
+    label: "Tech Inspection Deadline",
+    type: CustomFieldType.DATE,
+    icon: "🔧",
+  },
+  {
+    label: "License Plate",
+    type: CustomFieldType.TEXT,
+    icon: "🚛",
+  },
+  {
+    label: "Mileage",
+    type: CustomFieldType.NUMBER,
+    icon: "🔢",
+  },
+  {
+    label: "Is Active",
+    type: CustomFieldType.BOOLEAN,
+    icon: "✅",
+  },
+];

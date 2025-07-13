@@ -17,6 +17,7 @@ import {
   CustomField,
   CustomFieldType,
   DateCustomField,
+  FIELD_TEMPLATES,
   NumberCustomField,
   TextCustomField,
   Truck,
@@ -32,35 +33,6 @@ interface TruckModalProps {
   truck?: Truck | null;
   mode: "add" | "edit";
 }
-
-// Template fields for common truck fields
-const FIELD_TEMPLATES = [
-  {
-    label: "Insurance Deadline",
-    type: CustomFieldType.DATE,
-    icon: "📄",
-  },
-  {
-    label: "Tech Inspection Deadline",
-    type: CustomFieldType.DATE,
-    icon: "🔧",
-  },
-  {
-    label: "License Plate",
-    type: CustomFieldType.TEXT,
-    icon: "🚛",
-  },
-  {
-    label: "Mileage",
-    type: CustomFieldType.NUMBER,
-    icon: "📊",
-  },
-  {
-    label: "Is Active",
-    type: CustomFieldType.BOOLEAN,
-    icon: "✅",
-  },
-];
 
 export const TruckModal: React.FC<TruckModalProps> = ({
   visible,
@@ -192,7 +164,7 @@ export const TruckModal: React.FC<TruckModalProps> = ({
     setDatePickerState({
       visible: true,
       fieldId,
-      currentDate: currentDate || new Date(),
+      currentDate: currentDate ? new Date(currentDate) : new Date(),
     });
   };
 
@@ -531,7 +503,7 @@ const styles = StyleSheet.create({
     width: "100%",
     maxWidth: 400,
     maxHeight: "90%",
-    minHeight: "60%",
+    minHeight: "40%",
     borderRadius: 15,
     shadowOpacity: 0.3,
     shadowColor: "#000",

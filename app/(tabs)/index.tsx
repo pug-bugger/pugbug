@@ -208,23 +208,10 @@ export default function HomeScreen() {
 
   const headerContent = (
     <ThemedView style={styles.headerContent}>
-      <ThemedText style={styles.headerContentText} type="title">
-        My Trucks
-      </ThemedText>
-
-      {/* Notification Status */}
-      {!isNotificationSetupComplete() && (
-        <ThemedView style={styles.notificationWarning}>
-          <IconSymbol name="bell.slash" size={16} color="#ffc107" />
-          <ThemedText style={styles.notificationWarningText}>
-            Notifications disabled
-          </ThemedText>
-        </ThemedView>
-      )}
-
       {/* Deadline Summary */}
       {(trucksWithUpcomingDeadlines.length > 0 ||
-        trucksWithOverdueDeadlines.length > 0) && (
+        trucksWithOverdueDeadlines.length > 0 ||
+        !isNotificationSetupComplete()) && (
         <ThemedView style={styles.deadlineSummary}>
           {trucksWithOverdueDeadlines.length > 0 && (
             <ThemedView style={styles.deadlineBadge}>
@@ -246,8 +233,21 @@ export default function HomeScreen() {
               </ThemedText>
             </ThemedView>
           )}
+          {/* Notification Status */}
+          {!isNotificationSetupComplete() && (
+            <ThemedView style={styles.notificationWarning}>
+              <IconSymbol name="bell.slash" size={16} color="#ffc107" />
+              <ThemedText style={styles.notificationWarningText}>
+                Notifications disabled
+              </ThemedText>
+            </ThemedView>
+          )}
         </ThemedView>
       )}
+
+      <ThemedText style={styles.headerContentText} type="title">
+        My Trucks
+      </ThemedText>
 
       <ThemedView
         style={{

@@ -1,6 +1,5 @@
 import { Tabs } from "expo-router";
 import React from "react";
-import { Platform } from "react-native";
 
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { CustomTabBar } from "@/components/ui/TabBar";
@@ -16,49 +15,6 @@ export default function TabLayout() {
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
         headerShown: false,
-        tabBarShowLabel: false,
-        tabBarIconStyle: {
-          height: "100%",
-        },
-        tabBarItemStyle: {
-          backgroundColor: "rgba(202, 202, 202, 0.2)",
-          margin: 5,
-          borderRadius: 50,
-          height: 60,
-          width: 60,
-        },
-        tabBarStyle: Platform.select({
-          ios: {
-            position: "absolute",
-            marginLeft: "20%",
-            marginRight: "20%",
-            bottom: 15,
-            borderRadius: 50,
-            height: 70,
-            backgroundColor: "rgba(255,255,255,1)",
-            borderWidth: 0,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.15,
-            shadowRadius: 16,
-            elevation: 10,
-          },
-          android: {
-            position: "absolute",
-            marginLeft: "20%",
-            marginRight: "20%",
-            bottom: 15,
-            borderRadius: 50,
-            height: 70,
-            backgroundColor: "rgba(255,255,255,1)",
-            borderWidth: 0,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.15,
-            shadowRadius: 16,
-          },
-          default: {},
-        }),
       }}
     >
       <Tabs.Screen

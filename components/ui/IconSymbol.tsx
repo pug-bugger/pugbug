@@ -23,6 +23,8 @@ const MAPPING = {
   "chevron.right": "chevron-right",
   plus: "add",
   ellipsis: "menu",
+  "truck.box.fill": "local-shipping",
+  "bell.fill": "notifications",
 } as IconMapping;
 
 /**

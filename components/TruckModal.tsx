@@ -481,7 +481,7 @@ export const TruckModal: React.FC<TruckModalProps> = ({
 
       <DateTimePickerModal
         isVisible={datePickerState.visible}
-        mode="date"
+        mode="datetime"
         onConfirm={handleDateConfirm}
         onCancel={hideDatePicker}
         date={datePickerState.currentDate || new Date()}

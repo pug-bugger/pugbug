@@ -25,6 +25,7 @@ const MAPPING = {
   ellipsis: "menu",
   "truck.box.fill": "local-shipping",
   "bell.fill": "notifications",
+  dashboard: "dashboard",
 } as IconMapping;
 
 /**

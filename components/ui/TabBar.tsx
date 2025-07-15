@@ -1,4 +1,3 @@
-import { Colors } from "@/constants/Colors";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
@@ -9,32 +8,31 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+const ACTIVE_COLOR = "#111"; // solid black
+const INACTIVE_COLOR = "#C7C7CC"; // light gray
+
 export function CustomTabBar({
   state,
   descriptors,
   navigation,
 }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
-  // One shared value per tab
   const scales = React.useRef(
     state.routes.map(() => useSharedValue(1))
   ).current;
 
   return (
-    <View style={[styles.tabBar, { paddingBottom: insets.bottom }]}>
+    <View
+      style={[
+        styles.tabBar,
+        { paddingBottom: insets.bottom > 0 ? insets.bottom : 12 },
+      ]}
+    >
       {state.routes.map((route, index) => {
         const { options } = descriptors[route.key];
-        const label =
-          options.tabBarLabel !== undefined
-            ? options.tabBarLabel
-            : options.title !== undefined
-            ? options.title
-            : route.name;
         const isFocused = state.index === index;
         const onPress = () => {
-          // Animate scale up
           scales[index].value = withTiming(1.15, { duration: 120 }, () => {
-            // Animate scale back
             scales[index].value = withTiming(1, { duration: 120 });
           });
           const event = navigation.emit({
@@ -49,10 +47,8 @@ export function CustomTabBar({
         const icon = options.tabBarIcon
           ? options.tabBarIcon({
               focused: isFocused,
-              color: isFocused
-                ? Colors.light.tint
-                : Colors.light.tabIconDefault,
-              size: 24,
+              color: isFocused ? ACTIVE_COLOR : INACTIVE_COLOR,
+              size: 30,
             })
           : null;
         const animatedStyle = useAnimatedStyle(() => ({
@@ -68,15 +64,7 @@ export function CustomTabBar({
             style={styles.tabItemContainer}
             activeOpacity={0.8}
           >
-            <Animated.View
-              style={[
-                styles.tabItem,
-                isFocused && styles.tabItemActive,
-                animatedStyle,
-              ]}
-            >
-              {icon}
-            </Animated.View>
+            <Animated.View style={animatedStyle}>{icon}</Animated.View>
           </TouchableOpacity>
         );
       })}
@@ -86,44 +74,28 @@ export function CustomTabBar({
 
 const styles = StyleSheet.create({
   tabBar: {
-    display: "flex",
     flexDirection: "row",
-    justifyContent: "center",
-    gap: 16,
+    justifyContent: "space-between",
+    alignItems: "center",
     position: "absolute",
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgb(175, 175, 175)",
-    borderTopLeftRadius: 40,
-    borderTopRightRadius: 40,
+    height: 70,
+    backgroundColor: "#fff",
+    borderRadius: 32,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
     elevation: 8,
+    borderWidth: 1,
+    borderColor: "#F0F0F3",
+    paddingHorizontal: 0,
   },
   tabItemContainer: {
-    marginVertical: 8,
-  },
-  tabItem: {
-    flexDirection: "row",
+    flex: 1,
     alignItems: "center",
-    borderRadius: 30,
-    paddingHorizontal: 10,
-    paddingVertical: 10,
-    backgroundColor: "rgba(255,255,255,0.5)",
-    minWidth: 48,
-    minHeight: 48,
-  },
-  tabItemActive: {
-    backgroundColor: "rgba(255,255,255,1)",
-    borderRadius: 30,
-  },
-  tabLabel: {
-    color: Colors.light.tint,
-    fontWeight: "600",
-    fontSize: 16,
-    marginLeft: 8,
+    justifyContent: "center",
   },
 });

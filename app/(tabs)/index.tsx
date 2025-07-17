@@ -1,19 +1,14 @@
 import React, { useState } from "react";
-import {
-  Alert,
-  Image,
-  Pressable,
-  RefreshControl,
-  StyleSheet,
-  View,
-} from "react-native";
+import { Alert, Animated, Pressable, StyleSheet, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import ParallaxScrollView from "@/components/ParallaxScrollView";
+import CardsContainer from "@/components/CardsContainer";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { TruckModal } from "@/components/TruckModal";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { Menu } from "@/components/ui/Menu";
+import { Colors } from "@/constants/Colors";
 import { useNotificationIntegration } from "@/hooks/useNotificationIntegration";
 import { useTrucks } from "@/hooks/useTrucks";
 import {
@@ -208,8 +203,7 @@ export default function HomeScreen() {
 
   const headerContent = (
     <ThemedView style={styles.headerContent}>
-      {/* Deadline Summary */}
-      {(trucksWithUpcomingDeadlines.length > 0 ||
+      {/* {(trucksWithUpcomingDeadlines.length > 0 ||
         trucksWithOverdueDeadlines.length > 0 ||
         !isNotificationSetupComplete()) && (
         <ThemedView style={styles.deadlineSummary}>
@@ -233,7 +227,6 @@ export default function HomeScreen() {
               </ThemedText>
             </ThemedView>
           )}
-          {/* Notification Status */}
           {!isNotificationSetupComplete() && (
             <ThemedView style={styles.notificationWarning}>
               <IconSymbol name="bell.slash" size={16} color="#ffc107" />
@@ -243,7 +236,7 @@ export default function HomeScreen() {
             </ThemedView>
           )}
         </ThemedView>
-      )}
+      )} */}
 
       <ThemedText style={styles.headerContentText} type="title">
         My Trucks
@@ -268,125 +261,133 @@ export default function HomeScreen() {
 
   return (
     <>
-      <ParallaxScrollView
-        headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
-        headerImage={
-          <Image
-            source={require("@/assets/images/Grey_Icons.png")}
-            style={styles.reactLogo}
-          />
-        }
-        headerContent={headerContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={loading}
-            onRefresh={refreshTrucks}
-            colors={["#A1CEDC"]}
-            tintColor="#A1CEDC"
-          />
-        }
-      >
-        <ThemedView style={styles.titleContainer}>
-          <ThemedText type="title">Total Trucks: {trucks.length}</ThemedText>
-        </ThemedView>
+      <SafeAreaView style={styles.container}>
+        <Animated.ScrollView
+          overScrollMode="never"
+          showsVerticalScrollIndicator={false}
+        >
+          <ThemedView style={styles.contentContainer}>
+            {headerContent}
+            <CardsContainer />
 
-        {error && (
-          <ThemedView style={styles.errorContainer}>
-            <ThemedText style={styles.errorText}>{error}</ThemedText>
-          </ThemedView>
-        )}
-
-        {loading && trucks.length === 0 ? (
-          <ThemedView style={styles.loadingContainer}>
-            <ThemedText>Loading trucks...</ThemedText>
-          </ThemedView>
-        ) : trucks.length === 0 ? (
-          <ThemedView style={styles.emptyContainer}>
-            <ThemedText>No trucks found. Add your first truck!</ThemedText>
-          </ThemedView>
-        ) : (
-          trucks.map((truck) => (
-            <ThemedView key={truck.id} style={styles.truckContainer}>
-              <ThemedView style={styles.truckHeader}>
-                <ThemedText type="subtitle">{truck.name}</ThemedText>
-                <ThemedView style={styles.truckActions}>
-                  <Menu
-                    onEdit={() => handleEditTruck(truck)}
-                    onDelete={() => handleDeleteTruck(truck)}
-                  />
-                </ThemedView>
+            {error && (
+              <ThemedView style={styles.errorContainer}>
+                <ThemedText style={styles.errorText}>{error}</ThemedText>
               </ThemedView>
+            )}
 
-              <ThemedText style={styles.truckNote}>{truck.note}</ThemedText>
-
-              {/* Custom Fields Display */}
-              {truck.customFields && truck.customFields.length > 0 && (
-                <ThemedView style={styles.customFieldsContainer}>
-                  {truck.customFields.map((field) => (
-                    <ThemedView key={field.id} style={styles.fieldItem}>
-                      <ThemedView style={styles.fieldHeader}>
-                        <ThemedText style={styles.fieldTypeIcon}>
-                          {getFieldTypeIcon(field.type)}
-                        </ThemedText>
-                        <ThemedText style={styles.fieldLabel}>
-                          {field.label}:
-                        </ThemedText>
-                      </ThemedView>
-                      <View style={styles.fieldValueContainer}>
-                        {getFieldIcon(field, truck.id)}
-                        <ThemedText style={getFieldStyle(field, truck.id)}>
-                          {formatFieldValue(field)}
-                        </ThemedText>
-                      </View>
+            {loading && trucks.length === 0 ? (
+              <ThemedView style={styles.loadingContainer}>
+                <ThemedText>Loading trucks...</ThemedText>
+              </ThemedView>
+            ) : trucks.length === 0 ? (
+              <ThemedView style={styles.emptyContainer}>
+                <ThemedText>No trucks found. Add your first truck!</ThemedText>
+              </ThemedView>
+            ) : (
+              trucks.map((truck) => (
+                <ThemedView key={truck.id} style={styles.truckContainer}>
+                  <ThemedView style={styles.truckHeader}>
+                    <ThemedText type="subtitle">{truck.name}</ThemedText>
+                    <ThemedView style={styles.truckActions}>
+                      <Menu
+                        onEdit={() => handleEditTruck(truck)}
+                        onDelete={() => handleDeleteTruck(truck)}
+                      />
                     </ThemedView>
-                  ))}
-                </ThemedView>
-              )}
+                  </ThemedView>
 
-              {/* Show message if no custom fields */}
-              {(!truck.customFields || truck.customFields.length === 0) && (
-                <ThemedView style={styles.noFieldsContainer}>
-                  <ThemedText style={styles.noFieldsText}>
-                    No custom fields added. Edit truck to add fields.
-                  </ThemedText>
-                </ThemedView>
-              )}
+                  <ThemedText style={styles.truckNote}>{truck.note}</ThemedText>
 
-              <ThemedView style={styles.truckMeta}>
-                <ThemedText style={styles.metaText}>
-                  Created: {formatDate(truck.createdAt)}
-                </ThemedText>
-                {truck.updatedAt.getTime() !== truck.createdAt.getTime() && (
-                  <ThemedText style={styles.metaText}>
-                    Updated: {formatDate(truck.updatedAt)}
-                  </ThemedText>
-                )}
-              </ThemedView>
-            </ThemedView>
-          ))
-        )}
-        <TruckModal
-          visible={modalVisible}
-          mode={modalMode}
-          truck={editingTruck}
-          onClose={() => {
-            setModalVisible(false);
-            setEditingTruck(null);
-          }}
-          onSave={handleSaveTruck}
-        />
-      </ParallaxScrollView>
+                  {/* Custom Fields Display */}
+                  {truck.customFields && truck.customFields.length > 0 && (
+                    <ThemedView style={styles.customFieldsContainer}>
+                      {truck.customFields.map((field) => (
+                        <ThemedView key={field.id} style={styles.fieldItem}>
+                          <ThemedView style={styles.fieldHeader}>
+                            <ThemedText style={styles.fieldTypeIcon}>
+                              {getFieldTypeIcon(field.type)}
+                            </ThemedText>
+                            <ThemedText style={styles.fieldLabel}>
+                              {field.label}:
+                            </ThemedText>
+                          </ThemedView>
+                          <View style={styles.fieldValueContainer}>
+                            {getFieldIcon(field, truck.id)}
+                            <ThemedText style={getFieldStyle(field, truck.id)}>
+                              {formatFieldValue(field)}
+                            </ThemedText>
+                          </View>
+                        </ThemedView>
+                      ))}
+                    </ThemedView>
+                  )}
+
+                  {/* Show message if no custom fields */}
+                  {(!truck.customFields || truck.customFields.length === 0) && (
+                    <ThemedView style={styles.noFieldsContainer}>
+                      <ThemedText style={styles.noFieldsText}>
+                        No custom fields added. Edit truck to add fields.
+                      </ThemedText>
+                    </ThemedView>
+                  )}
+
+                  <ThemedView style={styles.truckMeta}>
+                    <ThemedText style={styles.metaText}>
+                      Created: {formatDate(truck.createdAt)}
+                    </ThemedText>
+                    {truck.updatedAt.getTime() !==
+                      truck.createdAt.getTime() && (
+                      <ThemedText style={styles.metaText}>
+                        Updated: {formatDate(truck.updatedAt)}
+                      </ThemedText>
+                    )}
+                  </ThemedView>
+                </ThemedView>
+              ))
+            )}
+            <TruckModal
+              visible={modalVisible}
+              mode={modalMode}
+              truck={editingTruck}
+              onClose={() => {
+                setModalVisible(false);
+                setEditingTruck(null);
+              }}
+              onSave={handleSaveTruck}
+            />
+          </ThemedView>
+        </Animated.ScrollView>
+      </SafeAreaView>
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+    backgroundColor: Colors.light.background,
+  },
+  contentContainer: {
+    flex: 1,
+    padding: 16,
+    paddingBottom: 80,
+    backgroundColor: "transparent",
+  },
+  tipCotnainer: {
     flexDirection: "row",
-    alignItems: "center",
     gap: 8,
-    paddingLeft: 8,
+  },
+  tipItem: {
+    padding: 16,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: 8,
     marginBottom: 16,
+    shadowOpacity: 0.2,
+    shadowColor: "rgba(202, 202, 202, 0.5)",
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 4,
   },
   truckContainer: {
     gap: 8,
@@ -539,12 +540,12 @@ const styles = StyleSheet.create({
     position: "absolute",
   },
   headerContent: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
     padding: 24,
     backgroundColor: "transparent",
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   headerContentText: {
     color: "white",

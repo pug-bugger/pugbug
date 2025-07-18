@@ -114,10 +114,16 @@ export default function HomeScreen() {
   };
 
   const formatDate = (date: Date | string) => {
+    if (!date) {
+      return "Not set";
+    }
     if (typeof date === "string") {
       return new Date(date).toLocaleDateString("lt-LT");
+    } else if (date instanceof Date) {
+      return date.toLocaleDateString("lt-LT");
+    } else {
+      return "Wrong type";
     }
-    return date.toLocaleDateString("lt-LT");
   };
 
   const getFieldStyle = (field: CustomField, truckId: string) => {

@@ -14,7 +14,7 @@ export interface BaseCustomField<T extends CustomFieldType, V> {
 }
 
 // Specific custom field implementations
-export interface DateCustomField extends BaseCustomField<CustomFieldType.DATE, Date | null> {}
+export interface DateCustomField extends BaseCustomField<CustomFieldType.DATE, Date | { seconds: number; nanoseconds: number } | null> {}
 export interface TextCustomField extends BaseCustomField<CustomFieldType.TEXT, string> {}
 export interface NumberCustomField extends BaseCustomField<CustomFieldType.NUMBER, number | null> {}
 export interface BooleanCustomField extends BaseCustomField<CustomFieldType.BOOLEAN, boolean> {}
@@ -26,8 +26,8 @@ export interface Truck {
   id: string;
   name: string;
   note: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | { seconds: number; nanoseconds: number };
+  updatedAt: Date | { seconds: number; nanoseconds: number };
   customFields: CustomField[];
 }
 

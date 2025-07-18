@@ -1,6 +1,8 @@
+import { db } from "@/services/Firebase";
+import { addDoc, collection, getDocs } from "firebase/firestore";
 import { useCallback, useEffect, useState } from 'react';
 import AsyncStorageService from '../services/AsyncStorageService';
-import { CreateTruckData, CustomFieldType, Truck, UpdateTruckData } from '../types/Truck';
+import { CreateTruckData, Truck, UpdateTruckData } from '../types/Truck';
 
 const TRUCKS_STORAGE_KEY = 'trucks';
 
@@ -17,46 +19,55 @@ export const useTrucks = () => {
       setLoading(true);
       setError(null);
       const storedTrucks = await truckService.load(TRUCKS_STORAGE_KEY);
+      const firebaseTrucks = (await getDocs(collection(db, TRUCKS_STORAGE_KEY))).docs.map(doc => doc.data() as Truck);
       
       // Migrate old truck data to new format
-      const migratedTrucks = (storedTrucks || []).map(truck => {
+      const migratedTrucks = (firebaseTrucks || storedTrucks || []).map(truck => {
         // Convert old deadline fields to custom fields if they exist
         const customFields = truck.customFields || [];
-        
-        // Add insurance deadline if it exists and not already in custom fields
-        if ('insuranceDeadline' in truck && truck.insuranceDeadline && typeof truck.insuranceDeadline === 'string') {
-          const hasInsuranceField = customFields.some(field => 
-            field.label === 'Insurance Deadline'
-          );
-          if (!hasInsuranceField) {
-            customFields.push({
-              id: `migrated_insurance_${truck.id}`,
-              type: CustomFieldType.DATE,
-              label: 'Insurance Deadline',
-              value: new Date(truck.insuranceDeadline),
-            });
+        truck.createdAt = new Date((truck.createdAt as { seconds: number }).seconds * 1000);
+        truck.updatedAt = new Date((truck.updatedAt as { seconds: number }).seconds * 1000);
+        truck.customFields = truck.customFields.map(field => {
+          if (field.type === 'DATE' && field.value) {
+            field.value = new Date((field.value as { seconds: number }).seconds * 1000);
           }
-        }
+          return field;
+        });
         
-        // Add tech inspection deadline if it exists and not already in custom fields
-        if ('techInspectionDeadline' in truck && truck.techInspectionDeadline && typeof truck.techInspectionDeadline === 'string') {
-          const hasTechField = customFields.some(field => 
-            field.label === 'Tech Inspection Deadline'
-          );
-          if (!hasTechField) {
-            customFields.push({
-              id: `migrated_tech_${truck.id}`,
-              type: CustomFieldType.DATE,
-              label: 'Tech Inspection Deadline',
-              value: new Date(truck.techInspectionDeadline),
-            });
-          }
-        }
+        // // Add insurance deadline if it exists and not already in custom fields
+        // if ('insuranceDeadline' in truck && truck.insuranceDeadline && typeof truck.insuranceDeadline === 'string') {
+        //   const hasInsuranceField = customFields.some(field => 
+        //     field.label === 'Insurance Deadline'
+        //   );
+        //   if (!hasInsuranceField) {
+        //     customFields.push({
+        //       id: `migrated_insurance_${truck.id}`,
+        //       type: CustomFieldType.DATE,
+        //       label: 'Insurance Deadline',
+        //       value: new Date(truck.insuranceDeadline),
+        //     });
+        //   }
+        // }
+        
+        // // Add tech inspection deadline if it exists and not already in custom fields
+        // if ('techInspectionDeadline' in truck && truck.techInspectionDeadline && typeof truck.techInspectionDeadline === 'string') {
+        //   const hasTechField = customFields.some(field => 
+        //     field.label === 'Tech Inspection Deadline'
+        //   );
+        //   if (!hasTechField) {
+        //     customFields.push({
+        //       id: `migrated_tech_${truck.id}`,
+        //       type: CustomFieldType.DATE,
+        //       label: 'Tech Inspection Deadline',
+        //       value: new Date(truck.techInspectionDeadline),
+        //     });
+        //   }
+        // }
         
         return {
           ...truck,
-          createdAt: typeof truck.createdAt === 'string' ? new Date(truck.createdAt) : truck.createdAt,
-          updatedAt: typeof truck.updatedAt === 'string' ? new Date(truck.updatedAt) : truck.updatedAt,
+          // createdAt: typeof truck.createdAt === 'string' ? new Date(truck.createdAt) : truck.createdAt,
+          // updatedAt: typeof truck.updatedAt === 'string' ? new Date(truck.updatedAt) : truck.updatedAt,
           customFields,
         };
       });
@@ -94,6 +105,7 @@ export const useTrucks = () => {
 
       const updatedTrucks = [...trucks, newTruck];
       await saveTrucks(updatedTrucks);
+      await addDoc(collection(db, TRUCKS_STORAGE_KEY), newTruck);
       return newTruck;
     } catch (err) {
       setError('Failed to add truck');

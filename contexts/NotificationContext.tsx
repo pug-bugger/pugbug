@@ -243,6 +243,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   return (
     <NotificationContext.Provider value={contextValue}>
       {children}
+      {/* <NotificationBanner /> */}
     </NotificationContext.Provider>
   );
 };

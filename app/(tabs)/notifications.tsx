@@ -1,49 +1,46 @@
 import NotificationSettings from "@/components/NotificationSettings";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { IconSymbol } from "@/components/ui/IconSymbol";
+import LogoutButton from "@/components/ui/LogoutButton";
+import { Colors } from "@/constants/Colors";
+import { useAuth } from "@/contexts/AuthContext";
 import React from "react";
-import { StyleSheet } from "react-native";
+import { Animated, SafeAreaView, StyleSheet } from "react-native";
 
 export default function NotificationsScreen() {
+  const { logout } = useAuth();
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
-      headerImage={
-        <IconSymbol
-          size={250}
-          color="#808080"
-          name="bell.fill"
-          style={styles.headerImage}
-        />
-      }
-    >
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Notifications</ThemedText>
-      </ThemedView>
+    <SafeAreaView style={styles.container}>
+      <Animated.ScrollView
+        overScrollMode="never"
+        showsVerticalScrollIndicator={false}
+      >
+        <ThemedView style={styles.contentContainer}>
+          <NotificationSettings />
+        </ThemedView>
 
-      <ThemedView style={styles.contentContainer}>
-        <NotificationSettings />
-      </ThemedView>
-    </ParallaxScrollView>
+        <ThemedView style={styles.logoutContainer}>
+          <LogoutButton onPress={logout} />
+        </ThemedView>
+      </Animated.ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 16,
-  },
-  headerImage: {
-    color: "#808080",
-    bottom: -90,
-    left: -35,
-    position: "absolute",
+  container: {
+    flex: 1,
+    backgroundColor: Colors.light.background,
+    paddingTop: 48,
   },
   contentContainer: {
     flex: 1,
+    padding: 16,
+    paddingBottom: 80,
+    backgroundColor: "transparent",
+  },
+  logoutContainer: {
+    padding: 16,
+    paddingBottom: 80,
+    backgroundColor: "transparent",
   },
 });

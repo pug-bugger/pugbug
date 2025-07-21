@@ -1,5 +1,6 @@
 import { auth } from "@/services/Firebase";
 import {
+  createUserWithEmailAndPassword,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut,
@@ -11,6 +12,8 @@ type AuthContextType = {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  register: (email: string, password: string) => Promise<void>;
+  loading: boolean;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -19,9 +22,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, setUser);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+      setLoading(false);
+    });
     return unsubscribe;
   }, []);
 
@@ -29,12 +36,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     await signInWithEmailAndPassword(auth, email, password);
   };
 
+  const register = async (email: string, password: string) => {
+    await createUserWithEmailAndPassword(auth, email, password);
+  };
+
   const logout = async () => {
     await signOut(auth);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, register, loading }}>
       {children}
     </AuthContext.Provider>
   );

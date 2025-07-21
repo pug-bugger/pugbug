@@ -14,6 +14,11 @@ export const Colors = {
     icon: '#687076',
     tabIconDefault: '#687076',
     tabIconSelected: tintColorLight,
+    logoutButton: '#FE4F2D',
+    logoutButtonText: '#FDFBEE',
+    defaultButtonBg: '#f8f9fa',
+    defaultButtonText: '#11181C',
+    defaultButtonBorder: '#e9ecef',
   },
   dark: {
     text: '#ECEDEE',

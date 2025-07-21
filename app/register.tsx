@@ -12,10 +12,11 @@ import {
   View,
 } from "react-native";
 
-export default function LoginScreen() {
-  const { login, loading } = useAuth();
+export default function RegisterScreen() {
+  const { register, loading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
   const [notificationText, setNotificationText] = useState("");
   const [showNotification, setShowNotification] = useState(false);
   const [notificationType, setNotificationType] = useState<
@@ -23,15 +24,19 @@ export default function LoginScreen() {
   >("error");
   const router = useRouter();
 
-  const handleLogin = async () => {
+  const handleRegister = async () => {
     try {
-      await login(email, password);
-      setNotificationText("Login successful!");
+      await register(email, password);
+      setNotificationText("Registration successful! Redirecting to login...");
       setNotificationType("success");
       setShowNotification(true);
+      setTimeout(() => {
+        router.replace("./login");
+      }, 1000);
     } catch (e) {
-      console.log(e);
-      setNotificationText("Invalid email or password");
+      setNotificationText(
+        `${e.message || "Registration failed"} | ${e.code || "Unknown error"}`
+      );
       setNotificationType("error");
       setShowNotification(true);
     }
@@ -43,7 +48,7 @@ export default function LoginScreen() {
     <View style={styles.container}>
       <View style={styles.headerBg} />
       <View style={styles.card}>
-        <Text style={styles.title}>Sign in</Text>
+        <Text style={styles.title}>Sign up</Text>
         <TextInput
           style={styles.input}
           placeholder="Email"
@@ -58,18 +63,26 @@ export default function LoginScreen() {
           onChangeText={setPassword}
           secureTextEntry
         />
-        <CustomButton type="auth" onPress={handleLogin} title="Sign In" />
-        <Pressable onPress={() => {}} style={styles.linkContainer}>
-          <Text style={styles.link}>Forgot your password?</Text>
-        </Pressable>
+        <TextInput
+          style={styles.input}
+          placeholder="Phone (optional)"
+          value={phone}
+          onChangeText={setPhone}
+          keyboardType="phone-pad"
+        />
+        <CustomButton type="auth" onPress={handleRegister} title="Sign Up" />
+        <Text style={styles.terms}>
+          By clicking this button, you agree with our{" "}
+          <Text style={styles.link}>Terms and Conditions</Text>
+        </Text>
         <View style={styles.socialRow}>
           <CustomButton type="default" onPress={() => {}} title="Google" />
           <CustomButton type="default" onPress={() => {}} title="Facebook" />
         </View>
         <View style={styles.bottomRow}>
-          <Text style={styles.bottomText}>Don't have an account? </Text>
-          <Pressable onPress={() => router.push("./register")}>
-            <Text style={styles.link}>Sign up</Text>
+          <Text style={styles.bottomText}>Already have an account? </Text>
+          <Pressable onPress={() => router.replace("./login")}>
+            <Text style={styles.link}>Sign in</Text>
           </Pressable>
         </View>
       </View>
@@ -128,9 +141,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     backgroundColor: "#f8f9fa",
   },
-  linkContainer: {
-    alignSelf: "flex-end",
-    marginBottom: 12,
+  terms: {
+    color: "#888",
+    fontSize: 12,
+    textAlign: "center",
+    marginBottom: 8,
   },
   link: {
     color: "#5b7fff",
@@ -147,16 +162,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginVertical: 16,
     gap: 12,
-  },
-  socialButton: {
-    flex: 1,
-    backgroundColor: "#f8f9fa",
-    borderRadius: 10,
-    paddingVertical: 12,
-    alignItems: "center",
-    marginHorizontal: 4,
-    borderWidth: 1,
-    borderColor: "#e9ecef",
   },
   bottomRow: {
     flexDirection: "row",

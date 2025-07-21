@@ -26,6 +26,13 @@ const MAPPING = {
   "truck.box.fill": "local-shipping",
   "bell.fill": "notifications",
   dashboard: "dashboard",
+  google: "google",
+  facebook: "facebook",
+  close: "close",
+  error: "error",
+  success: "check-circle",
+  warning: "warning",
+  info: "info",
 } as IconMapping;
 
 /**
@@ -54,3 +61,5 @@ export function IconSymbol({
     />
   );
 }
+
+export type { IconSymbolName };

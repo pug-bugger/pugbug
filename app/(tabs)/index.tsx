@@ -273,76 +273,85 @@ export default function HomeScreen() {
               </ThemedView>
             )}
 
-            {loading && trucks.length === 0 ? (
-              <ThemedView style={styles.loadingContainer}>
-                <ThemedText>Loading trucks...</ThemedText>
-              </ThemedView>
-            ) : trucks.length === 0 ? (
-              <ThemedView style={styles.emptyContainer}>
-                <ThemedText>No trucks found. Add your first truck!</ThemedText>
-              </ThemedView>
-            ) : (
-              trucks.map((truck) => (
-                <ThemedView key={truck.id} style={styles.truckContainer}>
-                  <ThemedView style={styles.truckHeader}>
-                    <ThemedText type="subtitle">{truck.name}</ThemedText>
-                    <ThemedView style={styles.truckActions}>
-                      <Menu
-                        onEdit={() => handleEditTruck(truck)}
-                        onDelete={() => handleDeleteTruck(truck)}
-                      />
-                    </ThemedView>
-                  </ThemedView>
-
-                  <ThemedText style={styles.truckNote}>{truck.note}</ThemedText>
-
-                  {/* Custom Fields Display */}
-                  {truck.customFields && truck.customFields.length > 0 && (
-                    <ThemedView style={styles.customFieldsContainer}>
-                      {truck.customFields.map((field) => (
-                        <ThemedView key={field.id} style={styles.fieldItem}>
-                          <ThemedView style={styles.fieldHeader}>
-                            <ThemedText style={styles.fieldTypeIcon}>
-                              {getFieldTypeIcon(field.type)}
-                            </ThemedText>
-                            <ThemedText style={styles.fieldLabel}>
-                              {field.label}:
-                            </ThemedText>
-                          </ThemedView>
-                          <View style={styles.fieldValueContainer}>
-                            {getFieldIcon(field, truck.id)}
-                            <ThemedText style={getFieldStyle(field, truck.id)}>
-                              {formatFieldValue(field)}
-                            </ThemedText>
-                          </View>
-                        </ThemedView>
-                      ))}
-                    </ThemedView>
-                  )}
-
-                  {/* Show message if no custom fields */}
-                  {(!truck.customFields || truck.customFields.length === 0) && (
-                    <ThemedView style={styles.noFieldsContainer}>
-                      <ThemedText style={styles.noFieldsText}>
-                        No custom fields added. Edit truck to add fields.
-                      </ThemedText>
-                    </ThemedView>
-                  )}
-
-                  <ThemedView style={styles.truckMeta}>
-                    <ThemedText style={styles.metaText}>
-                      Created: {formatDate(truck.createdAt)}
-                    </ThemedText>
-                    {truck.updatedAt.getTime() !==
-                      truck.createdAt.getTime() && (
-                      <ThemedText style={styles.metaText}>
-                        Updated: {formatDate(truck.updatedAt)}
-                      </ThemedText>
-                    )}
-                  </ThemedView>
+            <ThemedView style={styles.trucksContainer}>
+              {loading && trucks.length === 0 ? (
+                <ThemedView style={styles.loadingContainer}>
+                  <ThemedText>Loading trucks...</ThemedText>
                 </ThemedView>
-              ))
-            )}
+              ) : trucks.length === 0 ? (
+                <ThemedView style={styles.emptyContainer}>
+                  <ThemedText>
+                    No trucks found. Add your first truck!
+                  </ThemedText>
+                </ThemedView>
+              ) : (
+                trucks.map((truck) => (
+                  <ThemedView key={truck.id} style={styles.truckContainer}>
+                    <ThemedView style={styles.truckHeader}>
+                      <ThemedText type="subtitle">{truck.name}</ThemedText>
+                      <ThemedView style={styles.truckActions}>
+                        <Menu
+                          onEdit={() => handleEditTruck(truck)}
+                          onDelete={() => handleDeleteTruck(truck)}
+                        />
+                      </ThemedView>
+                    </ThemedView>
+
+                    <ThemedText style={styles.truckNote}>
+                      {truck.note}
+                    </ThemedText>
+
+                    {/* Custom Fields Display */}
+                    {truck.customFields && truck.customFields.length > 0 && (
+                      <ThemedView style={styles.customFieldsContainer}>
+                        {truck.customFields.map((field) => (
+                          <ThemedView key={field.id} style={styles.fieldItem}>
+                            <ThemedView style={styles.fieldHeader}>
+                              <ThemedText style={styles.fieldTypeIcon}>
+                                {getFieldTypeIcon(field.type)}
+                              </ThemedText>
+                              <ThemedText style={styles.fieldLabel}>
+                                {field.label}:
+                              </ThemedText>
+                            </ThemedView>
+                            <View style={styles.fieldValueContainer}>
+                              {getFieldIcon(field, truck.id)}
+                              <ThemedText
+                                style={getFieldStyle(field, truck.id)}
+                              >
+                                {formatFieldValue(field)}
+                              </ThemedText>
+                            </View>
+                          </ThemedView>
+                        ))}
+                      </ThemedView>
+                    )}
+
+                    {/* Show message if no custom fields */}
+                    {(!truck.customFields ||
+                      truck.customFields.length === 0) && (
+                      <ThemedView style={styles.noFieldsContainer}>
+                        <ThemedText style={styles.noFieldsText}>
+                          No custom fields added. Edit truck to add fields.
+                        </ThemedText>
+                      </ThemedView>
+                    )}
+
+                    <ThemedView style={styles.truckMeta}>
+                      <ThemedText style={styles.metaText}>
+                        Created: {formatDate(truck.createdAt)}
+                      </ThemedText>
+                      {truck.updatedAt.getTime() !==
+                        truck.createdAt.getTime() && (
+                        <ThemedText style={styles.metaText}>
+                          Updated: {formatDate(truck.updatedAt)}
+                        </ThemedText>
+                      )}
+                    </ThemedView>
+                  </ThemedView>
+                ))
+              )}
+            </ThemedView>
             <TruckModal
               visible={modalVisible}
               mode={modalMode}
@@ -398,6 +407,10 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowRadius: 4,
     elevation: 8,
+  },
+  trucksContainer: {
+    gap: 8,
+    marginTop: 24,
   },
   truckHeader: {
     flexDirection: "row",

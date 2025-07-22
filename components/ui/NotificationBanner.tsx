@@ -10,6 +10,7 @@ interface NotificationBannerProps {
   visible: boolean;
   onClose?: () => void;
   duration?: number; // ms
+  style?: any;
 }
 
 const ICONS: Record<NotificationType, IconSymbolName> = {
@@ -35,6 +36,7 @@ export default function NotificationBanner({
   visible,
   onClose,
   duration = 5000,
+  style,
 }: NotificationBannerProps) {
   const [show, setShow] = useState(visible);
   const translateY = useRef(new Animated.Value(-100)).current;
@@ -80,6 +82,7 @@ export default function NotificationBanner({
       style={[
         styles.banner,
         { backgroundColor: color.bg, transform: [{ translateY }] },
+        style,
       ]}
     >
       <IconSymbol name={ICONS[type]} size={24} color={color.icon} />

@@ -46,6 +46,14 @@ interface NotificationProviderProps {
   children: ReactNode;
 }
 
+interface NotificationStackItem {
+  id: string;
+  message: string;
+  type: NotificationType;
+  visible: boolean;
+  duration?: number;
+}
+
 export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   children,
 }) => {
@@ -64,24 +72,41 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [globalNotification, setGlobalNotification] = useState<{
-    message: string;
-    type: NotificationType;
-    visible: boolean;
-    duration?: number;
-  }>({ message: "", type: "info", visible: false });
+  const [notificationStack, setNotificationStack] = useState<
+    NotificationStackItem[]
+  >([]);
 
   const showNotification = (
     message: string,
     type: NotificationType = "info",
     duration = 5000
   ) => {
-    setGlobalNotification({ message, type, visible: true, duration });
+    const id = Math.random().toString(36).substr(2, 9);
+    setNotificationStack((prev) => [
+      { id, message, type, visible: true, duration },
+      ...prev,
+    ]);
   };
 
-  const handleBannerClose = () => {
-    setGlobalNotification((prev) => ({ ...prev, visible: false }));
+  const handleBannerClose = (id: string) => {
+    setNotificationStack((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, visible: false } : n))
+    );
   };
+
+  // Remove notifications from stack when not visible
+  useEffect(() => {
+    if (notificationStack.length === 0) return;
+    const timers = notificationStack.map((n) => {
+      if (n.visible && n.duration) {
+        return setTimeout(() => handleBannerClose(n.id), n.duration);
+      }
+      return null;
+    });
+    return () => {
+      timers.forEach((t) => t && clearTimeout(t));
+    };
+  }, [notificationStack]);
 
   // Initialize the context
   useEffect(() => {
@@ -270,13 +295,19 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   return (
     <NotificationContext.Provider value={contextValue}>
       {children}
-      <NotificationBanner
-        message={globalNotification.message}
-        type={globalNotification.type}
-        visible={globalNotification.visible}
-        onClose={handleBannerClose}
-        duration={globalNotification.duration}
-      />
+      <>
+        {notificationStack.map((n, idx) => (
+          <NotificationBanner
+            key={n.id}
+            message={n.message}
+            type={n.type}
+            visible={n.visible}
+            onClose={() => handleBannerClose(n.id)}
+            duration={n.duration}
+            style={{ top: 40 + idx * 64 }}
+          />
+        ))}
+      </>
     </NotificationContext.Provider>
   );
 };

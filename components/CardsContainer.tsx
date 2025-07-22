@@ -1,3 +1,4 @@
+import { useNotifications } from "@/contexts/NotificationContext";
 import { useTrucks } from "@/hooks/useTrucks";
 import { ScrollView, StyleSheet } from "react-native";
 import { ThemedView } from "./ThemedView";
@@ -5,9 +6,9 @@ import CardItem from "./ui/CardItem";
 
 export default function CardsContainer() {
   const { trucks } = useTrucks();
-
+  const { showNotification } = useNotifications();
   const onPress = (value: string) => {
-    console.log(`${value} pressed`);
+    showNotification(`Card with value ${value} pressed`, "info");
   };
 
   return (

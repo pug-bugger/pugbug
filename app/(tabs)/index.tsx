@@ -117,6 +117,18 @@ export default function HomeScreen() {
     if (!date) {
       return "Not set";
     }
+    // Firestore Timestamp object check
+    if (
+      typeof date === "object" &&
+      date !== null &&
+      typeof date.seconds === "number"
+    ) {
+      // Convert Firestore timestamp to JS Date
+      const jsDate = new Date(
+        date.seconds * 1000 + Math.floor(date.nanoseconds / 1e6)
+      );
+      return jsDate.toLocaleDateString("lt-LT");
+    }
     if (typeof date === "string") {
       return new Date(date).toLocaleDateString("lt-LT");
     } else if (date instanceof Date) {
@@ -341,8 +353,7 @@ export default function HomeScreen() {
                       <ThemedText style={styles.metaText}>
                         Created: {formatDate(truck.createdAt)}
                       </ThemedText>
-                      {truck.updatedAt.getTime() !==
-                        truck.createdAt.getTime() && (
+                      {truck.updatedAt !== truck.createdAt && (
                         <ThemedText style={styles.metaText}>
                           Updated: {formatDate(truck.updatedAt)}
                         </ThemedText>

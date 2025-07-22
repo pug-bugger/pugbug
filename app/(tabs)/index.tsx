@@ -98,7 +98,7 @@ export default function HomeScreen() {
       case CustomFieldType.DATE:
         const dateField = field as DateCustomField;
         if (!dateField.value) return "Not set";
-        return new Date(dateField.value).toLocaleDateString("lt-LT");
+        return formatDate(dateField.value);
       case CustomFieldType.TEXT:
         const textField = field as TextCustomField;
         return textField.value || "Not set";
@@ -113,19 +113,18 @@ export default function HomeScreen() {
     }
   };
 
-  const formatDate = (date: Date | string) => {
+  const formatDate = (
+    date: Date | string | { seconds: number; nanoseconds: number } | null
+  ) => {
     if (!date) {
-      return "Not set";
+      return "-";
     }
     // Firestore Timestamp object check
-    if (
-      typeof date === "object" &&
-      date !== null &&
-      typeof date.seconds === "number"
-    ) {
+    if (typeof date === "object" && date !== null && "seconds" in date) {
+      const dateObject = date as { seconds: number; nanoseconds: number };
       // Convert Firestore timestamp to JS Date
       const jsDate = new Date(
-        date.seconds * 1000 + Math.floor(date.nanoseconds / 1e6)
+        dateObject.seconds * 1000 + Math.floor(dateObject.nanoseconds / 1e6)
       );
       return jsDate.toLocaleDateString("lt-LT");
     }

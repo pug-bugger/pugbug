@@ -1,18 +1,22 @@
-import { StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { ThemedText } from "../ThemedText";
 
 export default function CardItem({
   label,
   value,
+  onPress,
 }: {
   label: string;
   value: string;
+  onPress?: () => void;
 }) {
   return (
-    <View style={styles.container}>
-      <ThemedText style={styles.value}>{value}</ThemedText>
-      <ThemedText style={styles.label}>{label}</ThemedText>
-    </View>
+    <Pressable onPress={onPress}>
+      <View style={styles.container}>
+        <ThemedText style={styles.value}>{value}</ThemedText>
+        <ThemedText style={styles.label}>{label}</ThemedText>
+      </View>
+    </Pressable>
   );
 }
 

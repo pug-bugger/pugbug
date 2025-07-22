@@ -1,4 +1,5 @@
 import CustomButton from "@/components/ui/CustomButton";
+import { IconSymbol } from "@/components/ui/IconSymbol";
 import NotificationBanner from "@/components/ui/NotificationBanner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "expo-router";
@@ -16,6 +17,7 @@ export default function LoginScreen() {
   const { login, loading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [notificationText, setNotificationText] = useState("");
   const [showNotification, setShowNotification] = useState(false);
   const [notificationType, setNotificationType] = useState<
@@ -51,13 +53,26 @@ export default function LoginScreen() {
           onChangeText={setEmail}
           autoCapitalize="none"
         />
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
+        <View style={{ position: "relative" }}>
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!showPassword}
+          />
+          <Pressable
+            style={styles.eyeButton}
+            onPress={() => setShowPassword((v) => !v)}
+            hitSlop={8}
+          >
+            <IconSymbol
+              name={showPassword ? "eye" : "eye-off"}
+              size={22}
+              color="#888"
+            />
+          </Pressable>
+        </View>
         <CustomButton type="auth" onPress={handleLogin} title="Sign In" />
         <Pressable onPress={() => {}} style={styles.linkContainer}>
           <Text style={styles.link}>Forgot your password?</Text>
@@ -167,5 +182,12 @@ const styles = StyleSheet.create({
   bottomText: {
     color: "#888",
     fontSize: 14,
+  },
+  eyeButton: {
+    position: "absolute",
+    right: 12,
+    top: 12,
+    padding: 4,
+    zIndex: 2,
   },
 });

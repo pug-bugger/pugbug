@@ -248,16 +248,7 @@ export default function HomeScreen() {
         My Trucks
       </ThemedText>
 
-      <ThemedView
-        style={{
-          position: "absolute",
-          right: 24,
-          bottom: 12,
-          backgroundColor: "rgba(209, 208, 208, 0.8)",
-          borderRadius: 20,
-          padding: 4,
-        }}
-      >
+      <ThemedView style={styles.headerAddButton}>
         <Pressable onPress={handleAddTruck}>
           <IconSymbol size={28} name="plus" color="white" />
         </Pressable>
@@ -547,19 +538,24 @@ const styles = StyleSheet.create({
   },
   headerContent: {
     padding: 24,
+    marginBottom: 16,
     backgroundColor: "transparent",
     display: "flex",
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
+    justifyContent: "space-between",
   },
   headerContentText: {
-    color: "white",
+    color: Colors.light.text,
     fontSize: 28,
     fontWeight: "bold",
-    textShadowColor: "rgba(0, 0, 0, 0.3)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+    bottom: 0,
+  },
+  headerAddButton: {
+    backgroundColor: Colors.light.text,
+    borderRadius: 20,
+    padding: 2,
+    bottom: 0,
   },
   notificationWarning: {
     flexDirection: "row",

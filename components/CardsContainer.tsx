@@ -6,6 +6,10 @@ import CardItem from "./ui/CardItem";
 export default function CardsContainer() {
   const { trucks } = useTrucks();
 
+  const onPress = (value: string) => {
+    console.log(`${value} pressed`);
+  };
+
   return (
     <ScrollView
       horizontal
@@ -14,9 +18,9 @@ export default function CardsContainer() {
     >
       <ThemedView style={styles.container}>
         <CardItem label="Total Trucks" value={trucks.length.toString()} />
-        <CardItem label="Total Trucks" value="2" />
-        <CardItem label="Total Trucks" value="3" />
-        <CardItem label="Total Trucks" value="4" />
+        <CardItem label="Total Trucks" value="2" onPress={() => onPress("2")} />
+        <CardItem label="Total Trucks" value="3" onPress={() => onPress("3")} />
+        <CardItem label="Total Trucks" value="4" onPress={() => onPress("4")} />
       </ThemedView>
     </ScrollView>
   );

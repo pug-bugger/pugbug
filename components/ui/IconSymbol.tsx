@@ -33,6 +33,8 @@ const MAPPING = {
   success: "check-circle",
   warning: "warning",
   info: "info",
+  eye: "visibility",
+  "eye-off": "visibility-off",
 } as IconMapping;
 
 /**

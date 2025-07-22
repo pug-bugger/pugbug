@@ -1,3 +1,6 @@
+import NotificationBanner, {
+  NotificationType,
+} from "@/components/ui/NotificationBanner";
 import React, {
   createContext,
   ReactNode,
@@ -28,6 +31,11 @@ interface NotificationContextType {
   enableNotifications: () => Promise<void>;
   disableNotifications: () => Promise<void>;
   refreshStatus: () => Promise<void>;
+  showNotification: (
+    message: string,
+    type?: NotificationType,
+    duration?: number
+  ) => void;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(
@@ -56,6 +64,24 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [globalNotification, setGlobalNotification] = useState<{
+    message: string;
+    type: NotificationType;
+    visible: boolean;
+    duration?: number;
+  }>({ message: "", type: "info", visible: false });
+
+  const showNotification = (
+    message: string,
+    type: NotificationType = "info",
+    duration = 5000
+  ) => {
+    setGlobalNotification({ message, type, visible: true, duration });
+  };
+
+  const handleBannerClose = () => {
+    setGlobalNotification((prev) => ({ ...prev, visible: false }));
+  };
 
   // Initialize the context
   useEffect(() => {
@@ -238,12 +264,19 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     enableNotifications,
     disableNotifications,
     refreshStatus,
+    showNotification,
   };
 
   return (
     <NotificationContext.Provider value={contextValue}>
       {children}
-      {/* <NotificationBanner /> */}
+      <NotificationBanner
+        message={globalNotification.message}
+        type={globalNotification.type}
+        visible={globalNotification.visible}
+        onClose={handleBannerClose}
+        duration={globalNotification.duration}
+      />
     </NotificationContext.Provider>
   );
 };

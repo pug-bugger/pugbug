@@ -1,7 +1,7 @@
 import CustomButton from "@/components/ui/CustomButton";
 import { IconSymbol } from "@/components/ui/IconSymbol";
-import NotificationBanner from "@/components/ui/NotificationBanner";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNotifications } from "@/contexts/NotificationContext";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -15,27 +15,18 @@ import {
 
 export default function LoginScreen() {
   const { login, loading } = useAuth();
+  const { showNotification } = useNotifications();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [notificationText, setNotificationText] = useState("");
-  const [showNotification, setShowNotification] = useState(false);
-  const [notificationType, setNotificationType] = useState<
-    "error" | "success" | "warning" | "info"
-  >("error");
   const router = useRouter();
 
   const handleLogin = async () => {
     try {
       await login(email, password);
-      setNotificationText("Login successful!");
-      setNotificationType("success");
-      setShowNotification(true);
+      showNotification("Login successful!", "success");
     } catch (e) {
-      console.log(e);
-      setNotificationText("Invalid email or password");
-      setNotificationType("error");
-      setShowNotification(true);
+      showNotification("Invalid email or password", "error");
     }
   };
 
@@ -88,12 +79,6 @@ export default function LoginScreen() {
           </Pressable>
         </View>
       </View>
-      <NotificationBanner
-        message={notificationText}
-        type={notificationType}
-        visible={showNotification}
-        onClose={() => setShowNotification(false)}
-      />
     </View>
   );
 }

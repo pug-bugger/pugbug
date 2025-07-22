@@ -53,12 +53,6 @@ export default function NotificationBanner({
         handleClose();
       }, duration);
       return () => clearTimeout(timer);
-    } else {
-      Animated.timing(translateY, {
-        toValue: -100,
-        duration: 200,
-        useNativeDriver: true,
-      }).start(() => setShow(false));
     }
   }, [visible]);
 

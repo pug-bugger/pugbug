@@ -1,6 +1,6 @@
 import CustomButton from "@/components/ui/CustomButton";
-import NotificationBanner from "@/components/ui/NotificationBanner";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNotifications } from "@/contexts/NotificationContext";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -14,31 +14,26 @@ import {
 
 export default function RegisterScreen() {
   const { register, loading } = useAuth();
+  const { showNotification } = useNotifications();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
-  const [notificationText, setNotificationText] = useState("");
-  const [showNotification, setShowNotification] = useState(false);
-  const [notificationType, setNotificationType] = useState<
-    "error" | "success" | "warning" | "info"
-  >("error");
   const router = useRouter();
 
   const handleRegister = async () => {
     try {
       await register(email, password);
-      setNotificationText("Registration successful! Redirecting to login...");
-      setNotificationType("success");
-      setShowNotification(true);
+      showNotification(
+        "Registration successful! Redirecting to login...",
+        "success"
+      );
       setTimeout(() => {
         router.replace("./login");
       }, 1000);
     } catch (e) {
-      setNotificationText(
-        `${e.message || "Registration failed"} | ${e.code || "Unknown error"}`
-      );
-      setNotificationType("error");
-      setShowNotification(true);
+      let errorMsg = "Registration failed";
+      if (e instanceof Error) errorMsg = e.message;
+      showNotification(errorMsg, "error");
     }
   };
 
@@ -86,12 +81,6 @@ export default function RegisterScreen() {
           </Pressable>
         </View>
       </View>
-      <NotificationBanner
-        message={notificationText}
-        type={notificationType}
-        visible={showNotification}
-        onClose={() => setShowNotification(false)}
-      />
     </View>
   );
 }

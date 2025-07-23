@@ -43,6 +43,9 @@ export default function LoginScreen() {
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
+          autoComplete="email"
+          autoCorrect={false}
+          keyboardType="email-address"
         />
         <View style={{ position: "relative" }}>
           <TextInput
@@ -51,6 +54,9 @@ export default function LoginScreen() {
             value={password}
             onChangeText={setPassword}
             secureTextEntry={!showPassword}
+            autoCapitalize="none"
+            autoComplete="password"
+            autoCorrect={false}
           />
           <Pressable
             style={styles.eyeButton}

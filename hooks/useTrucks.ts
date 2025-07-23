@@ -1,6 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/services/Firebase";
-import { addDoc, collection, getDocs } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDocs, updateDoc } from "firebase/firestore";
 import { useCallback, useEffect, useState } from 'react';
 import AsyncStorageService from '../services/AsyncStorageService';
 import { CreateTruckData, Truck, UpdateTruckData } from '../types/Truck';
@@ -29,7 +29,10 @@ export const useTrucks = () => {
       await truckService.remove(TRUCKS_STORAGE_KEY);
       // Load from Firestore: users/{uid}/trucks
       const trucksCol = collection(db, "users", user.uid, "trucks");
-      const firebaseTrucks = (await getDocs(trucksCol)).docs.map(doc => doc.data() as Truck);
+      const firebaseTrucks = (await getDocs(trucksCol)).docs.map(doc => ({
+        ...(doc.data() as Truck),
+        id: doc.id,
+      }));
       // Save to local storage for offline use
       await truckService.save(TRUCKS_STORAGE_KEY, firebaseTrucks);
       setTrucks(firebaseTrucks);
@@ -58,14 +61,15 @@ export const useTrucks = () => {
     if (!user) throw new Error('Not logged in');
     try {
       const newTruck: Truck = {
-        id: Date.now().toString(),
+        id: '',
         ...truckData,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
       // Add to Firestore under users/{uid}/trucks
       const trucksCol = collection(db, "users", user.uid, "trucks");
-      await addDoc(trucksCol, newTruck);
+      const newTruckRef = await addDoc(trucksCol, newTruck);
+      newTruck.id = newTruckRef.id;
       const updatedTrucks = [...trucks, newTruck];
       await saveTrucks(updatedTrucks);
       return newTruck;
@@ -76,8 +80,9 @@ export const useTrucks = () => {
     }
   }, [trucks, saveTrucks, user]);
 
-  // Update an existing truck (local only, for now)
+  // Update an existing truck
   const updateTruck = useCallback(async (id: string, updates: UpdateTruckData) => {
+    if (!user) throw new Error('Not logged in');
     try {
       const updatedTrucks = trucks.map(truck =>
         truck.id === id
@@ -88,6 +93,13 @@ export const useTrucks = () => {
             }
           : truck
       );
+      // Update in Firestore under users/{uid}/trucks
+      const trucksCol = collection(db, "users", user.uid, "trucks");
+      const truckDoc = doc(trucksCol, id);
+      await updateDoc(truckDoc, {
+        ...updates,
+        updatedAt: new Date(),
+      });
       await saveTrucks(updatedTrucks);
       return updatedTrucks.find(truck => truck.id === id);
     } catch (err) {
@@ -99,8 +111,13 @@ export const useTrucks = () => {
 
   // Delete a truck (local only, for now)
   const deleteTruck = useCallback(async (id: string) => {
+    if (!user) throw new Error('Not logged in');
     try {
       const updatedTrucks = trucks.filter(truck => truck.id !== id);
+      // Delete from Firestore under users/{uid}/trucks
+      const trucksCol = collection(db, "users", user.uid, "trucks");
+      const truckDoc = doc(trucksCol, id);
+      await deleteDoc(truckDoc);
       await saveTrucks(updatedTrucks);
     } catch (err) {
       setError('Failed to delete truck');

@@ -1,5 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/services/Firebase";
+import NetInfo from '@react-native-community/netinfo';
 import { addDoc, collection, deleteDoc, doc, getDocs, updateDoc } from "firebase/firestore";
 import { useCallback, useEffect, useState } from 'react';
 import AsyncStorageService from '../services/AsyncStorageService';
@@ -25,17 +26,24 @@ export const useTrucks = () => {
     try {
       setLoading(true);
       setError(null);
-      // Clear local storage before loading new user's data
-      await truckService.remove(TRUCKS_STORAGE_KEY);
-      // Load from Firestore: users/{uid}/trucks
-      const trucksCol = collection(db, "users", user.uid, "trucks");
-      const firebaseTrucks = (await getDocs(trucksCol)).docs.map(doc => ({
-        ...(doc.data() as Truck),
-        id: doc.id,
-      }));
-      // Save to local storage for offline use
-      await truckService.save(TRUCKS_STORAGE_KEY, firebaseTrucks);
-      setTrucks(firebaseTrucks);
+      const netState = await NetInfo.fetch();
+      if (netState.isConnected && netState.isInternetReachable !== false) {
+        // Online: Clear local storage before loading new user's data
+        await truckService.remove(TRUCKS_STORAGE_KEY);
+        // Load from Firestore: users/{uid}/trucks
+        const trucksCol = collection(db, "users", user.uid, "trucks");
+        const firebaseTrucks = (await getDocs(trucksCol)).docs.map(doc => ({
+          ...(doc.data() as Truck),
+          id: doc.id,
+        }));
+        // Save to local storage for offline use
+        await truckService.save(TRUCKS_STORAGE_KEY, firebaseTrucks);
+        setTrucks(firebaseTrucks);
+      } else {
+        // Offline: Load from local storage
+        const localTrucks = await truckService.load(TRUCKS_STORAGE_KEY);
+        setTrucks(localTrucks || []);
+      }
     } catch (err) {
       setError('Failed to load trucks');
       console.error('Error loading trucks:', err);

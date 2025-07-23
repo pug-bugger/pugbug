@@ -11,17 +11,7 @@ import { IconSymbol } from "@/components/ui/IconSymbol";
 import { Colors } from "@/constants/Colors";
 import { useNotificationIntegration } from "@/hooks/useNotificationIntegration";
 import { useTrucks } from "@/hooks/useTrucks";
-import {
-  BooleanCustomField,
-  CreateTruckData,
-  CustomField,
-  CustomFieldType,
-  DateCustomField,
-  NumberCustomField,
-  TextCustomField,
-  Truck,
-  UpdateTruckData,
-} from "@/types/Truck";
+import { CreateTruckData, Truck, UpdateTruckData } from "@/types/Truck";
 
 export default function HomeScreen() {
   const {
@@ -90,126 +80,6 @@ export default function HomeScreen() {
       setEditingTruck(null);
     } catch (error) {
       Alert.alert("Error", "Failed to save truck");
-    }
-  };
-
-  const formatFieldValue = (field: CustomField) => {
-    switch (field.type) {
-      case CustomFieldType.DATE:
-        const dateField = field as DateCustomField;
-        if (!dateField.value) return "Not set";
-        return formatDate(dateField.value);
-      case CustomFieldType.TEXT:
-        const textField = field as TextCustomField;
-        return textField.value || "Not set";
-      case CustomFieldType.NUMBER:
-        const numberField = field as NumberCustomField;
-        return numberField.value?.toString() || "Not set";
-      case CustomFieldType.BOOLEAN:
-        const booleanField = field as BooleanCustomField;
-        return booleanField.value ? "Yes" : "No";
-      default:
-        return "Not set";
-    }
-  };
-
-  const formatDate = (
-    date: Date | string | { seconds: number; nanoseconds: number } | null
-  ) => {
-    if (!date) {
-      return "-";
-    }
-    // Firestore Timestamp object check
-    if (typeof date === "object" && date !== null && "seconds" in date) {
-      const dateObject = date as { seconds: number; nanoseconds: number };
-      // Convert Firestore timestamp to JS Date
-      const jsDate = new Date(
-        dateObject.seconds * 1000 + Math.floor(dateObject.nanoseconds / 1e6)
-      );
-      return jsDate.toLocaleDateString("lt-LT");
-    }
-    if (typeof date === "string") {
-      return new Date(date).toLocaleDateString("lt-LT");
-    } else if (date instanceof Date) {
-      return date.toLocaleDateString("lt-LT");
-    } else {
-      return "Wrong type";
-    }
-  };
-
-  const getFieldStyle = (field: CustomField, truckId: string) => {
-    if (field.type !== CustomFieldType.DATE || !field.value)
-      return styles.fieldValue;
-
-    const status = getTruckDeadlineStatus(truckId);
-    if (!status) return styles.fieldValue;
-
-    // Check if this field matches any of the custom fields status
-    const customFieldStatus = status.customFields.find(
-      (cf) => cf.id === field.id
-    );
-    if (customFieldStatus) {
-      switch (customFieldStatus.status) {
-        case "overdue":
-          return styles.overdueText;
-        case "warning":
-          return styles.upcomingText;
-        default:
-          return styles.fieldValue;
-      }
-    }
-
-    return styles.fieldValue;
-  };
-
-  const getFieldIcon = (field: CustomField, truckId: string) => {
-    if (field.type !== CustomFieldType.DATE || !field.value) return null;
-
-    const status = getTruckDeadlineStatus(truckId);
-    if (!status) return null;
-
-    // Check if this field matches any of the custom fields status
-    const customFieldStatus = status.customFields.find(
-      (cf) => cf.id === field.id
-    );
-    if (customFieldStatus) {
-      switch (customFieldStatus.status) {
-        case "overdue":
-          return (
-            <IconSymbol
-              name="exclamationmark.triangle.fill"
-              size={16}
-              color="#dc3545"
-            />
-          );
-        case "warning":
-          return <IconSymbol name="clock.fill" size={16} color="#ffc107" />;
-        default:
-          return (
-            <IconSymbol
-              name="checkmark.circle.fill"
-              size={16}
-              color="#28a745"
-            />
-          );
-      }
-    }
-
-    return null;
-  };
-
-  const getFieldTypeIcon = (fieldType: CustomFieldType) => {
-    switch (fieldType) {
-      case CustomFieldType.DATE:
-        return "📅";
-      case CustomFieldType.TEXT:
-        return "📝";
-      case CustomFieldType.NUMBER:
-        return "🔢";
-      case CustomFieldType.BOOLEAN:
-        return "✅";
-      default:
-        return "📋";
     }
   };
 

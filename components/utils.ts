@@ -2,7 +2,7 @@ export function formatDate(
   date: Date | string | { seconds: number; nanoseconds: number } | null
 ): string {
   if (!date) {
-    return "-";
+    return "Not set";
   }
   if (typeof date === "object" && date !== null && "seconds" in date) {
     const dateObject = date as { seconds: number; nanoseconds: number };

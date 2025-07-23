@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { Alert, Animated, Pressable, StyleSheet } from "react-native";
+import {
+  Alert,
+  Animated,
+  Pressable,
+  RefreshControl,
+  StyleSheet,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import CardsContainer from "@/components/CardsContainer";
@@ -149,6 +155,9 @@ export default function HomeScreen() {
         <Animated.ScrollView
           overScrollMode="never"
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={loading} onRefresh={refreshTrucks} />
+          }
         >
           <ThemedView style={styles.contentContainer}>
             {headerContent}

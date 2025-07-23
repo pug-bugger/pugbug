@@ -25,6 +25,7 @@ import {
 } from "../types/Truck";
 import { ThemedText } from "./ThemedText";
 import { ThemedView } from "./ThemedView";
+import { formatDate } from "./utils";
 
 interface TruckModalProps {
   visible: boolean;
@@ -151,13 +152,6 @@ export const TruckModal: React.FC<TruckModalProps> = ({
   const handleCancel = () => {
     if (loading) return;
     onClose();
-  };
-
-  const formatDate = (date: Date | null) => {
-    if (!date) return "Not set";
-    const dateObj = typeof date === "string" ? new Date(date) : date;
-    if (isNaN(dateObj.getTime())) return "Invalid date";
-    return dateObj.toLocaleDateString("lt-LT");
   };
 
   const showDatePicker = (fieldId: string, currentDate: Date | null) => {

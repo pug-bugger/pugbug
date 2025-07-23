@@ -1,13 +1,13 @@
 import React, { useState } from "react";
-import { Alert, Animated, Pressable, StyleSheet, View } from "react-native";
+import { Alert, Animated, Pressable, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import CardsContainer from "@/components/CardsContainer";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import TruckList from "@/components/TruckList";
 import { TruckModal } from "@/components/TruckModal";
 import { IconSymbol } from "@/components/ui/IconSymbol";
-import { Menu } from "@/components/ui/Menu";
 import { Colors } from "@/constants/Colors";
 import { useNotificationIntegration } from "@/hooks/useNotificationIntegration";
 import { useTrucks } from "@/hooks/useTrucks";
@@ -267,6 +267,12 @@ export default function HomeScreen() {
     </ThemedView>
   );
 
+  const noTrucksFound = (
+    <ThemedView style={styles.emptyContainer}>
+      <ThemedText>No trucks found. Add your first truck!</ThemedText>
+    </ThemedView>
+  );
+
   return (
     <>
       <SafeAreaView style={styles.container}>
@@ -278,90 +284,15 @@ export default function HomeScreen() {
             {headerContent}
             <CardsContainer />
 
-            {error && (
-              <ThemedView style={styles.errorContainer}>
-                <ThemedText style={styles.errorText}>{error}</ThemedText>
-              </ThemedView>
-            )}
+            <TruckList
+              trucks={trucks}
+              loading={loading}
+              error={error}
+              onEdit={handleEditTruck}
+              onDelete={handleDeleteTruck}
+              getTruckDeadlineStatus={getTruckDeadlineStatus}
+            />
 
-            <ThemedView style={styles.trucksContainer}>
-              {loading && trucks.length === 0 ? (
-                <ThemedView style={styles.loadingContainer}>
-                  <ThemedText>Loading trucks...</ThemedText>
-                </ThemedView>
-              ) : trucks.length === 0 ? (
-                <ThemedView style={styles.emptyContainer}>
-                  <ThemedText>
-                    No trucks found. Add your first truck!
-                  </ThemedText>
-                </ThemedView>
-              ) : (
-                trucks.map((truck) => (
-                  <ThemedView key={truck.id} style={styles.truckContainer}>
-                    <ThemedView style={styles.truckHeader}>
-                      <ThemedText type="subtitle">{truck.name}</ThemedText>
-                      <ThemedView style={styles.truckActions}>
-                        <Menu
-                          onEdit={() => handleEditTruck(truck)}
-                          onDelete={() => handleDeleteTruck(truck)}
-                        />
-                      </ThemedView>
-                    </ThemedView>
-
-                    <ThemedText style={styles.truckNote}>
-                      {truck.note}
-                    </ThemedText>
-
-                    {/* Custom Fields Display */}
-                    {truck.customFields && truck.customFields.length > 0 && (
-                      <ThemedView style={styles.customFieldsContainer}>
-                        {truck.customFields.map((field) => (
-                          <ThemedView key={field.id} style={styles.fieldItem}>
-                            <ThemedView style={styles.fieldHeader}>
-                              <ThemedText style={styles.fieldTypeIcon}>
-                                {getFieldTypeIcon(field.type)}
-                              </ThemedText>
-                              <ThemedText style={styles.fieldLabel}>
-                                {field.label}:
-                              </ThemedText>
-                            </ThemedView>
-                            <View style={styles.fieldValueContainer}>
-                              {getFieldIcon(field, truck.id)}
-                              <ThemedText
-                                style={getFieldStyle(field, truck.id)}
-                              >
-                                {formatFieldValue(field)}
-                              </ThemedText>
-                            </View>
-                          </ThemedView>
-                        ))}
-                      </ThemedView>
-                    )}
-
-                    {/* Show message if no custom fields */}
-                    {(!truck.customFields ||
-                      truck.customFields.length === 0) && (
-                      <ThemedView style={styles.noFieldsContainer}>
-                        <ThemedText style={styles.noFieldsText}>
-                          No custom fields added. Edit truck to add fields.
-                        </ThemedText>
-                      </ThemedView>
-                    )}
-
-                    <ThemedView style={styles.truckMeta}>
-                      <ThemedText style={styles.metaText}>
-                        Created: {formatDate(truck.createdAt)}
-                      </ThemedText>
-                      {truck.updatedAt !== truck.createdAt && (
-                        <ThemedText style={styles.metaText}>
-                          Updated: {formatDate(truck.updatedAt)}
-                        </ThemedText>
-                      )}
-                    </ThemedView>
-                  </ThemedView>
-                ))
-              )}
-            </ThemedView>
             <TruckModal
               visible={modalVisible}
               mode={modalMode}

@@ -35,6 +35,7 @@ const MAPPING = {
   info: "info",
   eye: "visibility",
   "eye-off": "visibility-off",
+  "pie-chart": "bar-chart",
 } as IconMapping;
 
 /**

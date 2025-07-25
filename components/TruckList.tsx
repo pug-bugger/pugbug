@@ -1,3 +1,4 @@
+import useNotificationIntegration from "@/hooks/useNotificationIntegration";
 import {
   BooleanCustomField,
   CustomField,
@@ -21,7 +22,6 @@ interface TruckListProps {
   error?: string | null;
   onEdit: (truck: Truck) => void;
   onDelete: (truck: Truck) => void;
-  getTruckDeadlineStatus: (truckId: string) => any;
 }
 
 const TruckList: React.FC<TruckListProps> = ({
@@ -30,8 +30,9 @@ const TruckList: React.FC<TruckListProps> = ({
   error,
   onEdit,
   onDelete,
-  getTruckDeadlineStatus,
 }) => {
+  const { getTruckDeadlineStatus } = useNotificationIntegration();
+
   const formatFieldValue = (field: CustomField) => {
     switch (field.type) {
       case CustomFieldType.DATE:
@@ -105,18 +106,19 @@ const TruckList: React.FC<TruckListProps> = ({
     return null;
   };
 
-  const getFieldTypeIcon = (fieldType: CustomFieldType) => {
+  const getFieldTypeIcon = (fieldType?: CustomFieldType) => {
+    if (!fieldType) return "dot.fill";
     switch (fieldType) {
       case CustomFieldType.DATE:
-        return "📅";
+        return "calendar";
       case CustomFieldType.TEXT:
-        return "📝";
+        return "text";
       case CustomFieldType.NUMBER:
-        return "🔢";
+        return "number";
       case CustomFieldType.BOOLEAN:
-        return "✅";
+        return "check-box";
       default:
-        return "📋";
+        return "dot.fill";
     }
   };
 
@@ -166,9 +168,11 @@ const TruckList: React.FC<TruckListProps> = ({
               {truck.customFields.map((field) => (
                 <ThemedView key={field.id} style={styles.fieldItem}>
                   <ThemedView style={styles.fieldHeader}>
-                    <ThemedText style={styles.fieldTypeIcon}>
-                      {getFieldTypeIcon(field.type)}
-                    </ThemedText>
+                    <IconSymbol
+                      name={getFieldTypeIcon(field.type)}
+                      size={16}
+                      color="black"
+                    />
                     <ThemedText style={styles.fieldLabel}>
                       {field.label}:
                     </ThemedText>

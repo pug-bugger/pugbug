@@ -8,7 +8,7 @@ import {
   Switch,
   TextInput,
   TouchableOpacity,
-  View,
+  useColorScheme,
 } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import {
@@ -182,8 +182,8 @@ export const TruckModal: React.FC<TruckModalProps> = ({
       case CustomFieldType.DATE:
         const dateField = field as DateCustomField;
         return (
-          <View key={field.id} style={styles.fieldContainer}>
-            <View style={styles.fieldHeader}>
+          <ThemedView key={field.id} style={styles.fieldContainer}>
+            <ThemedView style={styles.fieldHeader}>
               <TextInput
                 style={styles.fieldLabel}
                 value={field.label}
@@ -200,8 +200,8 @@ export const TruckModal: React.FC<TruckModalProps> = ({
               >
                 <ThemedText style={styles.removeButtonText}>✕</ThemedText>
               </TouchableOpacity>
-            </View>
-            <View style={styles.dateContainer}>
+            </ThemedView>
+            <ThemedView style={styles.dateContainer}>
               <TouchableOpacity
                 style={styles.dateButton}
                 onPress={() => showDatePicker(field.id, dateField.value)}
@@ -222,15 +222,15 @@ export const TruckModal: React.FC<TruckModalProps> = ({
                   <ThemedText style={styles.clearButtonText}>Clear</ThemedText>
                 </TouchableOpacity>
               )}
-            </View>
-          </View>
+            </ThemedView>
+          </ThemedView>
         );
 
       case CustomFieldType.TEXT:
         const textField = field as TextCustomField;
         return (
-          <View key={field.id} style={styles.fieldContainer}>
-            <View style={styles.fieldHeader}>
+          <ThemedView key={field.id} style={styles.fieldContainer}>
+            <ThemedView style={styles.fieldHeader}>
               <TextInput
                 style={styles.fieldLabel}
                 value={field.label}
@@ -247,7 +247,7 @@ export const TruckModal: React.FC<TruckModalProps> = ({
               >
                 <ThemedText style={styles.removeButtonText}>✕</ThemedText>
               </TouchableOpacity>
-            </View>
+            </ThemedView>
             <TextInput
               style={styles.input}
               value={textField.value}
@@ -258,14 +258,14 @@ export const TruckModal: React.FC<TruckModalProps> = ({
               placeholderTextColor="#999"
               editable={!loading}
             />
-          </View>
+          </ThemedView>
         );
 
       case CustomFieldType.NUMBER:
         const numberField = field as NumberCustomField;
         return (
-          <View key={field.id} style={styles.fieldContainer}>
-            <View style={styles.fieldHeader}>
+          <ThemedView key={field.id} style={styles.fieldContainer}>
+            <ThemedView style={styles.fieldHeader}>
               <TextInput
                 style={styles.fieldLabel}
                 value={field.label}
@@ -282,7 +282,7 @@ export const TruckModal: React.FC<TruckModalProps> = ({
               >
                 <ThemedText style={styles.removeButtonText}>✕</ThemedText>
               </TouchableOpacity>
-            </View>
+            </ThemedView>
             <TextInput
               style={styles.input}
               value={numberField.value?.toString() || ""}
@@ -297,14 +297,20 @@ export const TruckModal: React.FC<TruckModalProps> = ({
               keyboardType="numeric"
               editable={!loading}
             />
-          </View>
+          </ThemedView>
         );
 
       case CustomFieldType.BOOLEAN:
         const booleanField = field as BooleanCustomField;
         return (
-          <View key={field.id} style={styles.fieldContainer}>
-            <View style={styles.fieldHeader}>
+          <ThemedView
+            key={field.id}
+            style={[
+              styles.fieldContainer,
+              { backgroundColor: colorScheme === "dark" ? "#111" : "#f8f9fa" },
+            ]}
+          >
+            <ThemedView style={styles.fieldHeader}>
               <TextInput
                 style={styles.fieldLabel}
                 value={field.label}
@@ -321,8 +327,8 @@ export const TruckModal: React.FC<TruckModalProps> = ({
               >
                 <ThemedText style={styles.removeButtonText}>✕</ThemedText>
               </TouchableOpacity>
-            </View>
-            <View style={styles.switchContainer}>
+            </ThemedView>
+            <ThemedView style={styles.switchContainer}>
               <Switch
                 value={booleanField.value}
                 onValueChange={(value) =>
@@ -333,8 +339,8 @@ export const TruckModal: React.FC<TruckModalProps> = ({
               <ThemedText style={styles.switchLabel}>
                 {booleanField.value ? "Yes" : "No"}
               </ThemedText>
-            </View>
-          </View>
+            </ThemedView>
+          </ThemedView>
         );
 
       default:
@@ -342,17 +348,20 @@ export const TruckModal: React.FC<TruckModalProps> = ({
     }
   };
 
+  const colorScheme = useColorScheme();
+
   return (
     <Modal
       visible={visible}
       animationType="fade"
       transparent={true}
       onRequestClose={handleCancel}
+      statusBarTranslucent={true}
+      presentationStyle="overFullScreen"
     >
-      <View style={styles.overlay}>
+      <ThemedView style={styles.overlay}>
         <ThemedView style={styles.modalContent}>
           <ScrollView
-            contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
@@ -360,7 +369,7 @@ export const TruckModal: React.FC<TruckModalProps> = ({
               {mode === "add" ? "Add New Truck" : "Edit Truck"}
             </ThemedText>
 
-            <View style={styles.inputContainer}>
+            <ThemedView style={styles.inputContainer}>
               <ThemedText style={styles.label}>Truck Name *</ThemedText>
               <TextInput
                 style={styles.input}
@@ -372,9 +381,9 @@ export const TruckModal: React.FC<TruckModalProps> = ({
                 autoCapitalize="words"
                 returnKeyType="next"
               />
-            </View>
+            </ThemedView>
 
-            <View style={styles.inputContainer}>
+            <ThemedView style={styles.inputContainer}>
               <ThemedText style={styles.label}>Note</ThemedText>
               <TextInput
                 style={[styles.input, styles.textArea]}
@@ -388,11 +397,11 @@ export const TruckModal: React.FC<TruckModalProps> = ({
                 textAlignVertical="top"
                 returnKeyType="done"
               />
-            </View>
+            </ThemedView>
 
             {/* Custom Fields Section */}
-            <View style={styles.customFieldsSection}>
-              <View style={styles.customFieldsHeader}>
+            <ThemedView style={styles.customFieldsSection}>
+              <ThemedView style={styles.customFieldsHeader}>
                 <ThemedText style={styles.sectionTitle}>
                   Custom Fields
                 </ThemedText>
@@ -405,14 +414,22 @@ export const TruckModal: React.FC<TruckModalProps> = ({
                     {showTemplates ? "Hide Templates" : "Add Field"}
                   </ThemedText>
                 </TouchableOpacity>
-              </View>
+              </ThemedView>
 
               {showTemplates && (
-                <View style={styles.templatesContainer}>
+                <ThemedView
+                  style={[
+                    styles.templatesContainer,
+                    {
+                      backgroundColor:
+                        colorScheme === "dark" ? "#111" : "#f8f9fa",
+                    },
+                  ]}
+                >
                   <ThemedText style={styles.templatesTitle}>
                     Field Templates:
                   </ThemedText>
-                  <View style={styles.templatesGrid}>
+                  <ThemedView style={styles.templatesGrid}>
                     {FIELD_TEMPLATES.map((template, index) => (
                       <TouchableOpacity
                         key={index}
@@ -428,7 +445,7 @@ export const TruckModal: React.FC<TruckModalProps> = ({
                         </ThemedText>
                       </TouchableOpacity>
                     ))}
-                  </View>
+                  </ThemedView>
                   <TouchableOpacity
                     style={styles.customFieldButton}
                     onPress={() => addCustomField()}
@@ -438,40 +455,40 @@ export const TruckModal: React.FC<TruckModalProps> = ({
                       + Custom Field
                     </ThemedText>
                   </TouchableOpacity>
-                </View>
+                </ThemedView>
               )}
 
               {customFields.map(renderCustomField)}
-            </View>
-
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={[styles.button, styles.cancelButton]}
-                onPress={handleCancel}
-                disabled={loading}
-                activeOpacity={0.7}
-              >
-                <ThemedText style={styles.buttonText}>Cancel</ThemedText>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.button,
-                  styles.saveButton,
-                  loading && styles.disabledButton,
-                ]}
-                onPress={handleSave}
-                disabled={loading}
-                activeOpacity={0.7}
-              >
-                <ThemedText style={styles.buttonText}>
-                  {loading ? "Saving..." : "Save"}
-                </ThemedText>
-              </TouchableOpacity>
-            </View>
+            </ThemedView>
           </ScrollView>
+
+          <ThemedView style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={[styles.button, styles.cancelButton]}
+              onPress={handleCancel}
+              disabled={loading}
+              activeOpacity={0.7}
+            >
+              <ThemedText style={styles.buttonText}>Cancel</ThemedText>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.button,
+                styles.saveButton,
+                loading && styles.disabledButton,
+              ]}
+              onPress={handleSave}
+              disabled={loading}
+              activeOpacity={0.7}
+            >
+              <ThemedText style={styles.buttonText}>
+                {loading ? "Saving..." : "Save"}
+              </ThemedText>
+            </TouchableOpacity>
+          </ThemedView>
         </ThemedView>
-      </View>
+      </ThemedView>
 
       <DateTimePickerModal
         isVisible={datePickerState.visible}
@@ -504,9 +521,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 8,
     elevation: 8,
-  },
-  scrollContent: {
-    padding: 20,
+    padding: 18,
   },
   modalTitle: {
     textAlign: "center",
@@ -521,7 +536,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     fontWeight: "600",
     fontSize: 16,
-    color: "#333",
+    // color: "#333",
   },
   input: {
     borderWidth: 1,
@@ -529,7 +544,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 14,
     fontSize: 16,
-    backgroundColor: "#fff",
+    // backgroundColor: "#fff",
     minHeight: Platform.OS === "android" ? 50 : 44,
   },
   textArea: {
@@ -548,7 +563,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#333",
+    // color: "#333",
   },
   addFieldButton: {
     backgroundColor: "#28a745",
@@ -564,14 +579,14 @@ const styles = StyleSheet.create({
   templatesContainer: {
     marginBottom: 20,
     padding: 15,
-    backgroundColor: "#f8f9fa",
+    // backgroundColor: "#f8f9fa",
     borderRadius: 8,
   },
   templatesTitle: {
     fontSize: 16,
     fontWeight: "600",
     marginBottom: 10,
-    color: "#333",
+    // color: "#333",
   },
   templatesGrid: {
     flexDirection: "row",
@@ -580,7 +595,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   templateButton: {
-    backgroundColor: "#fff",
+    // backgroundColor: "#fff",
     padding: 12,
     borderRadius: 8,
     alignItems: "center",
@@ -595,7 +610,7 @@ const styles = StyleSheet.create({
   templateLabel: {
     fontSize: 12,
     textAlign: "center",
-    color: "#333",
+    // color: "#333",
   },
   customFieldButton: {
     backgroundColor: "#6c757d",
@@ -604,14 +619,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   customFieldButtonText: {
-    color: "white",
+    // color: "white",
     fontSize: 14,
     fontWeight: "600",
   },
   fieldContainer: {
     marginBottom: 15,
     padding: 15,
-    backgroundColor: "#f8f9fa",
+    // backgroundColor: "#f8f9fa",
     borderRadius: 8,
     borderWidth: 1,
     borderColor: "#e9ecef",
@@ -631,7 +646,7 @@ const styles = StyleSheet.create({
     borderColor: "#ddd",
     borderRadius: 6,
     padding: 8,
-    backgroundColor: "#fff",
+    // backgroundColor: "#fff",
     marginRight: 10,
   },
   removeButton: {

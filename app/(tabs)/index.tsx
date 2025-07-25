@@ -1,11 +1,5 @@
 import React, { useState } from "react";
-import {
-  Alert,
-  Animated,
-  Pressable,
-  RefreshControl,
-  StyleSheet,
-} from "react-native";
+import { Alert, Animated, RefreshControl, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import CardsContainer from "@/components/CardsContainer";
@@ -13,9 +7,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import TruckList from "@/components/TruckList";
 import { TruckModal } from "@/components/TruckModal";
-import { IconSymbol } from "@/components/ui/IconSymbol";
-import { Colors } from "@/constants/Colors";
-import { useNotificationIntegration } from "@/hooks/useNotificationIntegration";
+import { ListHeader } from "@/components/ui/ListHeader";
 import { useTrucks } from "@/hooks/useTrucks";
 import { CreateTruckData, Truck, UpdateTruckData } from "@/types/Truck";
 
@@ -29,14 +21,6 @@ export default function HomeScreen() {
     deleteTruck,
     refreshTrucks,
   } = useTrucks();
-
-  const {
-    getTrucksWithUpcomingDeadlines,
-    getTrucksWithOverdueDeadlines,
-    getTruckDeadlineStatus,
-    isNotificationSetupComplete,
-    getNotificationSummary,
-  } = useNotificationIntegration();
 
   const [modalVisible, setModalVisible] = useState(false);
   const [editingTruck, setEditingTruck] = useState<Truck | null>(null);
@@ -89,60 +73,6 @@ export default function HomeScreen() {
     }
   };
 
-  // Get notification summary for header
-  const notificationSummary = getNotificationSummary();
-  const trucksWithUpcomingDeadlines = getTrucksWithUpcomingDeadlines();
-  const trucksWithOverdueDeadlines = getTrucksWithOverdueDeadlines();
-
-  const headerContent = (
-    <ThemedView style={styles.headerContent}>
-      {/* {(trucksWithUpcomingDeadlines.length > 0 ||
-        trucksWithOverdueDeadlines.length > 0 ||
-        !isNotificationSetupComplete()) && (
-        <ThemedView style={styles.deadlineSummary}>
-          {trucksWithOverdueDeadlines.length > 0 && (
-            <ThemedView style={styles.deadlineBadge}>
-              <IconSymbol
-                name="exclamationmark.triangle.fill"
-                size={14}
-                color="#dc3545"
-              />
-              <ThemedText style={styles.deadlineBadgeText}>
-                {trucksWithOverdueDeadlines.length} overdue
-              </ThemedText>
-            </ThemedView>
-          )}
-          {trucksWithUpcomingDeadlines.length > 0 && (
-            <ThemedView style={styles.deadlineBadge}>
-              <IconSymbol name="clock.fill" size={14} color="#ffc107" />
-              <ThemedText style={styles.deadlineBadgeText}>
-                {trucksWithUpcomingDeadlines.length} upcoming
-              </ThemedText>
-            </ThemedView>
-          )}
-          {!isNotificationSetupComplete() && (
-            <ThemedView style={styles.notificationWarning}>
-              <IconSymbol name="bell.slash" size={16} color="#ffc107" />
-              <ThemedText style={styles.notificationWarningText}>
-                Notifications disabled
-              </ThemedText>
-            </ThemedView>
-          )}
-        </ThemedView>
-      )} */}
-
-      <ThemedText style={styles.headerContentText} type="title">
-        My Trucks
-      </ThemedText>
-
-      <ThemedView style={styles.headerAddButton}>
-        <Pressable onPress={handleAddTruck}>
-          <IconSymbol size={28} name="plus" color="white" />
-        </Pressable>
-      </ThemedView>
-    </ThemedView>
-  );
-
   const noTrucksFound = (
     <ThemedView style={styles.emptyContainer}>
       <ThemedText>No trucks found. Add your first truck!</ThemedText>
@@ -160,31 +90,33 @@ export default function HomeScreen() {
           }
         >
           <ThemedView style={styles.contentContainer}>
-            {headerContent}
+            <ListHeader onAddTruck={handleAddTruck} title="My Records" />
             <CardsContainer />
 
-            <TruckList
-              trucks={trucks}
-              loading={loading}
-              error={error}
-              onEdit={handleEditTruck}
-              onDelete={handleDeleteTruck}
-              getTruckDeadlineStatus={getTruckDeadlineStatus}
-            />
-
-            <TruckModal
-              visible={modalVisible}
-              mode={modalMode}
-              truck={editingTruck}
-              onClose={() => {
-                setModalVisible(false);
-                setEditingTruck(null);
-              }}
-              onSave={handleSaveTruck}
-            />
+            {trucks.length > 0 ? (
+              <TruckList
+                trucks={trucks}
+                loading={loading}
+                error={error}
+                onEdit={handleEditTruck}
+                onDelete={handleDeleteTruck}
+              />
+            ) : (
+              noTrucksFound
+            )}
           </ThemedView>
         </Animated.ScrollView>
       </SafeAreaView>
+      <TruckModal
+        visible={modalVisible}
+        mode={modalMode}
+        truck={editingTruck}
+        onClose={() => {
+          setModalVisible(false);
+          setEditingTruck(null);
+        }}
+        onSave={handleSaveTruck}
+      />
     </>
   );
 }
@@ -192,83 +124,11 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.light.background,
   },
   contentContainer: {
     flex: 1,
     padding: 16,
     paddingBottom: 80,
-    backgroundColor: "transparent",
-  },
-  tipCotnainer: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  tipItem: {
-    padding: 16,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    borderRadius: 8,
-    marginBottom: 16,
-    shadowOpacity: 0.2,
-    shadowColor: "rgba(202, 202, 202, 0.5)",
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  truckContainer: {
-    gap: 8,
-    borderColor: "#ecf0f1",
-    borderWidth: 1,
-    borderRadius: 15,
-    padding: 12,
-    marginBottom: 12,
-    shadowOpacity: 0.2,
-    shadowColor: "rgba(202, 202, 202, 1)",
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 4,
-    elevation: 8,
-  },
-  trucksContainer: {
-    gap: 8,
-    marginTop: 24,
-  },
-  truckHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  truckActions: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  actionButton: {
-    padding: 4,
-  },
-  truckNote: {
-    fontStyle: "italic",
-    color: "#666",
-  },
-  customFieldsContainer: {
-    gap: 6,
-    marginTop: 8,
-  },
-  fieldItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: "#e9ecef",
-  },
-  fieldHeader: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    alignItems: "center",
-    gap: 6,
-    flex: 1,
-    backgroundColor: "transparent",
   },
   fieldTypeIcon: {
     fontSize: 16,
@@ -287,143 +147,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#28a745",
   },
-  overdueText: {
-    fontSize: 14,
-    color: "#dc3545",
-    fontWeight: "600",
-  },
-  upcomingText: {
-    fontSize: 14,
-    color: "#ffc107",
-    fontWeight: "600",
-  },
-  noFieldsContainer: {
-    padding: 12,
-    backgroundColor: "#f8f9fa",
-    borderRadius: 8,
-    marginTop: 8,
-  },
-  noFieldsText: {
-    fontSize: 14,
-    color: "#6c757d",
-    fontStyle: "italic",
-    textAlign: "center",
-  },
-  // Legacy styles for deadline display (keeping for backward compatibility)
-  deadlinesContainer: {
-    gap: 4,
-    marginTop: 8,
-  },
-  deadlineItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  deadlineLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#333",
-  },
-  deadlineValueContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  deadlineText: {
-    fontSize: 14,
-    color: "#28a745",
-  },
-  truckMeta: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 8,
-  },
-  metaText: {
-    fontSize: 12,
-    color: "#999",
-  },
-  errorContainer: {
-    backgroundColor: "#f8d7da",
-    borderColor: "#f5c6cb",
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-  },
-  errorText: {
-    color: "#721c24",
-    textAlign: "center",
-  },
-  loadingContainer: {
-    padding: 20,
-    alignItems: "center",
-  },
   emptyContainer: {
     padding: 40,
     alignItems: "center",
-  },
-  reactLogo: {
-    height: "100%",
-    width: "100%",
-    bottom: 0,
-    left: 0,
-    position: "absolute",
-  },
-  headerContent: {
-    padding: 24,
-    marginBottom: 16,
-    backgroundColor: "transparent",
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  headerContentText: {
-    color: Colors.light.text,
-    fontSize: 28,
-    fontWeight: "bold",
-    bottom: 0,
-  },
-  headerAddButton: {
-    backgroundColor: Colors.light.text,
-    borderRadius: 20,
-    padding: 2,
-    bottom: 0,
-  },
-  notificationWarning: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    marginTop: 4,
-    backgroundColor: "rgba(255, 228, 145, 0.2)",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    alignSelf: "flex-start",
-  },
-  notificationWarningText: {
-    color: "#ffc107",
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  deadlineSummary: {
-    flexDirection: "row",
-    gap: 8,
-    marginTop: 8,
-    backgroundColor: "transparent",
-  },
-  deadlineBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  deadlineBadgeText: {
-    color: "white",
-    fontSize: 12,
-    fontWeight: "600",
   },
 });

@@ -7,8 +7,8 @@ import {
   Text,
   TouchableOpacity,
   UIManager,
-  View,
 } from "react-native";
+import { ThemedView } from "../ThemedView";
 import { IconSymbol } from "./IconSymbol";
 
 interface MenuProps {
@@ -29,8 +29,7 @@ export const Menu: React.FC<MenuProps> = ({ onEdit, onDelete }) => {
       const node = findNodeHandle(triggerRef.current);
       if (node) {
         UIManager.measureInWindow(node, (x, y, width, height) => {
-          // Position menu below and right-aligned to the trigger
-          setMenuPosition({ x: x + width - 120, y: y + height + 4 });
+          setMenuPosition({ x: x + width - 120, y: y + height + 30 });
           setVisible(true);
         });
       } else {
@@ -54,7 +53,7 @@ export const Menu: React.FC<MenuProps> = ({ onEdit, onDelete }) => {
   };
 
   return (
-    <View>
+    <>
       <TouchableOpacity
         ref={triggerRef}
         onPress={handleOpen}
@@ -68,9 +67,11 @@ export const Menu: React.FC<MenuProps> = ({ onEdit, onDelete }) => {
         transparent
         animationType="fade"
         onRequestClose={handleClose}
+        statusBarTranslucent={true}
+        presentationStyle="overFullScreen"
       >
         <Pressable style={styles.overlay} onPress={handleClose}>
-          <View
+          <ThemedView
             style={[
               styles.menu,
               {
@@ -88,10 +89,10 @@ export const Menu: React.FC<MenuProps> = ({ onEdit, onDelete }) => {
                 Delete
               </Text>
             </Pressable>
-          </View>
+          </ThemedView>
         </Pressable>
       </Modal>
-    </View>
+    </>
   );
 };
 
@@ -101,7 +102,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.1)",
+    backgroundColor: "rgba(0, 0, 0, 0.1)",
   },
   menu: {
     backgroundColor: "#fff",

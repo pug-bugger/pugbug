@@ -5,6 +5,7 @@ import { IconSymbol } from "@/components/ui/IconSymbol";
 import { CustomTabBar } from "@/components/ui/TabBar";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { Platform } from "react-native";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -31,7 +32,11 @@ export default function TabLayout() {
         options={{
           title: "Dashboard",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="pie-chart" color={color} />
+            <IconSymbol
+              size={28}
+              name={Platform.OS === "ios" ? "chart.bar.fill" : "pie-chart"}
+              color={color}
+            />
           ),
         }}
       />

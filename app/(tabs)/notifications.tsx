@@ -1,7 +1,6 @@
 import NotificationSettings from "@/components/NotificationSettings";
 import { ThemedView } from "@/components/ThemedView";
 import LogoutButton from "@/components/ui/LogoutButton";
-import { Colors } from "@/constants/Colors";
 import { useAuth } from "@/contexts/AuthContext";
 import React from "react";
 import { Animated, SafeAreaView, StyleSheet } from "react-native";
@@ -29,7 +28,6 @@ export default function NotificationsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.light.background,
     paddingTop: 48,
   },
   contentContainer: {

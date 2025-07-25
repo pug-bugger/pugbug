@@ -22,7 +22,7 @@ const MAPPING = {
   "chevron.left.forwardslash.chevron.right": "code",
   "chevron.right": "chevron-right",
   plus: "add",
-  ellipsis: "menu",
+  ellipsis: "more-vert",
   "truck.box.fill": "local-shipping",
   "bell.fill": "notifications",
   dashboard: "dashboard",
@@ -36,6 +36,11 @@ const MAPPING = {
   eye: "visibility",
   "eye-off": "visibility-off",
   "pie-chart": "bar-chart",
+  calendar: "calendar-month",
+  text: "short-text",
+  number: "numbers",
+  "check-box": "check-box",
+  "dot.fill": "circle",
 } as IconMapping;
 
 /**

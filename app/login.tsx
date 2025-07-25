@@ -1,7 +1,11 @@
+import { ThemedInput } from "@/components/ThemedInput";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
 import CustomButton from "@/components/ui/CustomButton";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNotifications } from "@/contexts/NotificationContext";
+import { useColorScheme } from "@/hooks/useColorScheme";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -10,7 +14,6 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  View,
 } from "react-native";
 
 export default function LoginScreen() {
@@ -32,13 +35,19 @@ export default function LoginScreen() {
 
   if (loading) return <ActivityIndicator style={{ marginTop: 40 }} />;
 
+  const colorScheme = useColorScheme();
+  const cardBgColor = colorScheme === "dark" ? "#08090a" : "white";
+  const inputBgColor = colorScheme === "dark" ? "black" : "#f8f9fa";
+
   return (
-    <View style={styles.container}>
-      <View style={styles.headerBg} />
-      <View style={styles.card}>
-        <Text style={styles.title}>Sign in</Text>
+    <ThemedView style={styles.container}>
+      <ThemedView style={styles.headerBg} />
+      <ThemedView style={[styles.card, { backgroundColor: cardBgColor }]}>
+        <ThemedText type="title" style={styles.title}>
+          Sign in
+        </ThemedText>
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: inputBgColor }]}
           placeholder="Email"
           value={email}
           onChangeText={setEmail}
@@ -47,9 +56,11 @@ export default function LoginScreen() {
           autoCorrect={false}
           keyboardType="email-address"
         />
-        <View style={{ position: "relative" }}>
-          <TextInput
-            style={styles.input}
+        <ThemedView
+          style={{ position: "relative", backgroundColor: "transparent" }}
+        >
+          <ThemedInput
+            style={[styles.input, { backgroundColor: inputBgColor }]}
             placeholder="Password"
             value={password}
             onChangeText={setPassword}
@@ -69,30 +80,34 @@ export default function LoginScreen() {
               color="#888"
             />
           </Pressable>
-        </View>
+        </ThemedView>
         <CustomButton type="auth" onPress={handleLogin} title="Sign In" />
         <Pressable onPress={() => {}} style={styles.linkContainer}>
           <Text style={styles.link}>Forgot your password?</Text>
         </Pressable>
-        <View style={styles.socialRow}>
+        <ThemedView
+          style={[styles.socialRow, { backgroundColor: "transparent" }]}
+        >
           <CustomButton type="default" onPress={() => {}} title="Google" />
           <CustomButton type="default" onPress={() => {}} title="Facebook" />
-        </View>
-        <View style={styles.bottomRow}>
+        </ThemedView>
+        <ThemedView
+          style={[styles.bottomRow, { backgroundColor: "transparent" }]}
+        >
           <Text style={styles.bottomText}>Don't have an account? </Text>
           <Pressable onPress={() => router.push("./register")}>
             <Text style={styles.link}>Sign up</Text>
           </Pressable>
-        </View>
-      </View>
-    </View>
+        </ThemedView>
+      </ThemedView>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fdf6f0",
+    backgroundColor: "#f8f9fa",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -108,7 +123,6 @@ const styles = StyleSheet.create({
   },
   card: {
     width: "90%",
-    backgroundColor: "white",
     borderRadius: 24,
     padding: 28,
     shadowColor: "#000",
@@ -119,10 +133,8 @@ const styles = StyleSheet.create({
     alignItems: "stretch",
   },
   title: {
-    fontSize: 32,
-    fontWeight: "bold",
     marginBottom: 24,
-    color: "#222",
+    paddingVertical: 8,
     alignSelf: "center",
   },
   input: {

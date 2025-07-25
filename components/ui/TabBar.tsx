@@ -1,15 +1,18 @@
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import React from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ThemedView } from "../ThemedView";
 
 const ACTIVE_COLOR = "#111"; // solid black
 const INACTIVE_COLOR = "#C7C7CC"; // light gray
+const ACTIVE_COLOR_DARK = "#fff"; // solid white
+const INACTIVE_COLOR_DARK = "#8E8E93"; // dark gray
 
 export function CustomTabBar({
   state,
@@ -20,9 +23,12 @@ export function CustomTabBar({
   const scales = React.useRef(
     state.routes.map(() => useSharedValue(1))
   ).current;
-
+  const colorScheme = useColorScheme();
+  const activeColor = colorScheme === "dark" ? ACTIVE_COLOR_DARK : ACTIVE_COLOR;
+  const inactiveColor =
+    colorScheme === "dark" ? INACTIVE_COLOR_DARK : INACTIVE_COLOR;
   return (
-    <View
+    <ThemedView
       style={[
         styles.tabBar,
         { paddingBottom: insets.bottom > 0 ? insets.bottom : 12 },
@@ -47,7 +53,7 @@ export function CustomTabBar({
         const icon = options.tabBarIcon
           ? options.tabBarIcon({
               focused: isFocused,
-              color: isFocused ? ACTIVE_COLOR : INACTIVE_COLOR,
+              color: isFocused ? activeColor : inactiveColor,
               size: 30,
             })
           : null;
@@ -68,7 +74,7 @@ export function CustomTabBar({
           </TouchableOpacity>
         );
       })}
-    </View>
+    </ThemedView>
   );
 }
 
@@ -82,7 +88,6 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     height: 70,
-    backgroundColor: "#fff",
     borderRadius: 32,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },

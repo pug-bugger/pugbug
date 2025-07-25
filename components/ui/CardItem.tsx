@@ -1,5 +1,6 @@
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 import { ThemedText } from "../ThemedText";
+import { ThemedView } from "../ThemedView";
 
 export default function CardItem({
   label,
@@ -12,10 +13,10 @@ export default function CardItem({
 }) {
   return (
     <Pressable onPress={onPress}>
-      <View style={styles.container}>
+      <ThemedView style={styles.container}>
         <ThemedText style={styles.value}>{value}</ThemedText>
         <ThemedText style={styles.label}>{label}</ThemedText>
-      </View>
+      </ThemedView>
     </Pressable>
   );
 }
@@ -25,7 +26,6 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     gap: 4,
     alignItems: "center",
-    backgroundColor: "white",
     padding: 12,
     borderRadius: 8,
     shadowColor: "rgb(150, 150, 150)",
@@ -38,11 +38,9 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    color: "rgb(100, 100, 100)",
   },
   value: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "rgb(50, 50, 50)",
   },
 });

@@ -8,7 +8,6 @@ import {
   Switch,
   Text,
   TouchableOpacity,
-  View,
 } from "react-native";
 import {
   useNotificationActions,
@@ -183,7 +182,7 @@ export const NotificationSettings: React.FC = () => {
         {/* Permission Status */}
         <ThemedView style={styles.settingItem}>
           <ThemedText type="subtitle">Permission Status</ThemedText>
-          <View style={styles.permissionStatus}>
+          <ThemedView style={styles.permissionStatus}>
             <Text
               style={[
                 styles.permissionText,
@@ -200,7 +199,7 @@ export const NotificationSettings: React.FC = () => {
                 <Text style={styles.permissionButtonText}>Request</Text>
               </TouchableOpacity>
             )}
-          </View>
+          </ThemedView>
         </ThemedView>
 
         {/* Enable/Disable Notifications */}
@@ -250,32 +249,38 @@ export const NotificationSettings: React.FC = () => {
           <ThemedText style={styles.settingDescription}>
             Get notified this many days before deadlines
           </ThemedText>
-          <View style={styles.warningDaysContainer}>
-            {[3, 7, 14, 30].map((days) => (
-              <TouchableOpacity
-                key={days}
-                style={[
-                  styles.warningDayButton,
-                  settings.warningDays === days &&
-                    styles.warningDayButtonActive,
-                  !settings.enabled && styles.disabledButton,
-                ]}
-                onPress={() => handleWarningDaysChange(days)}
-                disabled={!settings.enabled}
-              >
-                <Text
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            overScrollMode="never"
+          >
+            <ThemedView style={styles.warningDaysContainer}>
+              {[3, 7, 14, 30].map((days) => (
+                <TouchableOpacity
+                  key={days}
                   style={[
-                    styles.warningDayButtonText,
+                    styles.warningDayButton,
                     settings.warningDays === days &&
-                      styles.warningDayButtonTextActive,
-                    !settings.enabled && styles.disabledText,
+                      styles.warningDayButtonActive,
+                    !settings.enabled && styles.disabledButton,
                   ]}
+                  onPress={() => handleWarningDaysChange(days)}
+                  disabled={!settings.enabled}
                 >
-                  {days} days
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+                  <Text
+                    style={[
+                      styles.warningDayButtonText,
+                      settings.warningDays === days &&
+                        styles.warningDayButtonTextActive,
+                      !settings.enabled && styles.disabledText,
+                    ]}
+                  >
+                    {days} days
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ThemedView>
+          </ScrollView>
         </ThemedView>
 
         {/* Test Actions */}
@@ -363,6 +368,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: "#ecf0f1",
+    gap: 16,
   },
   settingDescription: {
     fontSize: 12,

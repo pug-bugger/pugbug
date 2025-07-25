@@ -75,7 +75,7 @@ class NotificationService {
         return;
       }
 
-      console.log('Background notification task triggered');
+      // console.log('Background notification task triggered');
       
       // Check if it's time for daily notification
       await this.performDailyCheck();
@@ -88,7 +88,7 @@ class NotificationService {
         return;
       }
 
-      console.log('Daily check task triggered');
+      // console.log('Daily check task triggered');
       await this.performDailyCheck();
     });
   }
@@ -200,7 +200,7 @@ class NotificationService {
       const isRegistered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_NOTIFICATION_TASK);
       if (!isRegistered) {
         await Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);
-        console.log('Background notification task registered');
+        // console.log('Background notification task registered');
       }
     } catch (error) {
       console.error('Error registering background task:', error);
@@ -212,7 +212,7 @@ class NotificationService {
       const isRegistered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_NOTIFICATION_TASK);
       if (isRegistered) {
         await Notifications.unregisterTaskAsync(BACKGROUND_NOTIFICATION_TASK);
-        console.log('Background notification task unregistered');
+        // console.log('Background notification task unregistered');
       }
     } catch (error) {
       console.error('Error unregistering background task:', error);
@@ -235,7 +235,7 @@ class NotificationService {
         const lastCheckDay = new Date(lastCheckDate.getFullYear(), lastCheckDate.getMonth(), lastCheckDate.getDate());
         
         if (today.getTime() === lastCheckDay.getTime()) {
-          console.log('Daily check already performed today');
+          // console.log('Daily check already performed today');
           return;
         }
       }
@@ -368,7 +368,7 @@ class NotificationService {
         trigger: null, // Send immediately
       });
 
-      console.log('Deadline notification sent:', { title, body });
+      // console.log('Deadline notification sent:', { title, body });
     } catch (error) {
       console.error('Error sending deadline notification:', error);
     }
@@ -409,7 +409,7 @@ class NotificationService {
         },
       });
 
-      console.log(`Daily notification scheduled for ${settings.dailyTime}`);
+      // console.log(`Daily notification scheduled for ${settings.dailyTime}`);
     } catch (error) {
       console.error('Error scheduling notification:', error);
     }

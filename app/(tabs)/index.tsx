@@ -8,6 +8,7 @@ import { ThemedView } from "@/components/ThemedView";
 import TruckList from "@/components/TruckList";
 import { TruckModal } from "@/components/TruckModal";
 import { ListHeader } from "@/components/ui/ListHeader";
+import { useThemeColor } from "@/hooks/useThemeColor";
 import { useTrucks } from "@/hooks/useTrucks";
 import { CreateTruckData, Truck, UpdateTruckData } from "@/types/Truck";
 
@@ -79,9 +80,11 @@ export default function HomeScreen() {
     </ThemedView>
   );
 
+  const backgroundColor = useThemeColor({}, "background");
+
   return (
     <>
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor }]}>
         <Animated.ScrollView
           overScrollMode="never"
           showsVerticalScrollIndicator={false}
@@ -92,7 +95,6 @@ export default function HomeScreen() {
           <ThemedView style={styles.contentContainer}>
             <ListHeader onAddTruck={handleAddTruck} title="My Records" />
             <CardsContainer />
-
             {trucks.length > 0 ? (
               <TruckList
                 trucks={trucks}
@@ -130,25 +132,9 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingBottom: 80,
   },
-  fieldTypeIcon: {
-    fontSize: 16,
-  },
-  fieldLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#333",
-  },
-  fieldValueContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  fieldValue: {
-    fontSize: 14,
-    color: "#28a745",
-  },
   emptyContainer: {
     padding: 40,
     alignItems: "center",
+    justifyContent: "center",
   },
 });

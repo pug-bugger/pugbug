@@ -9,7 +9,7 @@ import {
   Truck,
 } from "@/types/Truck";
 import React from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet } from "react-native";
 import { ThemedText } from "./ThemedText";
 import { ThemedView } from "./ThemedView";
 import { IconSymbol } from "./ui/IconSymbol";
@@ -54,24 +54,26 @@ const TruckList: React.FC<TruckListProps> = ({
   };
 
   const getFieldStyle = (field: CustomField, truckId: string) => {
-    if (field.type !== CustomFieldType.DATE || !field.value)
-      return styles.fieldValue;
+    if (field.type !== CustomFieldType.DATE || !field.value) return null;
     const status = getTruckDeadlineStatus(truckId);
-    if (!status) return styles.fieldValue;
+    if (!status) return null;
     const customFieldStatus = status.customFields.find(
       (cf: any) => cf.id === field.id
     );
     if (customFieldStatus) {
+      // console.log(customFieldStatus.status);
       switch (customFieldStatus.status) {
         case "overdue":
           return styles.overdueText;
         case "warning":
           return styles.upcomingText;
+        case "ok":
+          return styles.goodText;
         default:
-          return styles.fieldValue;
+          return null;
       }
     }
-    return styles.fieldValue;
+    return null;
   };
 
   const getFieldIcon = (field: CustomField, truckId: string) => {
@@ -177,12 +179,17 @@ const TruckList: React.FC<TruckListProps> = ({
                       {field.label}:
                     </ThemedText>
                   </ThemedView>
-                  <View style={styles.fieldValueContainer}>
+                  <ThemedView style={styles.fieldValueContainer}>
                     {getFieldIcon(field, truck.id)}
-                    <ThemedText style={getFieldStyle(field, truck.id)}>
+                    <ThemedText
+                      style={[
+                        styles.fieldValue,
+                        getFieldStyle(field, truck.id),
+                      ]}
+                    >
                       {formatFieldValue(field)}
                     </ThemedText>
-                  </View>
+                  </ThemedView>
                 </ThemedView>
               ))}
             </ThemedView>
@@ -284,17 +291,20 @@ const styles = StyleSheet.create({
   },
   fieldValue: {
     fontSize: 14,
+  },
+  goodText: {
+    fontSize: 14,
     color: "#28a745",
   },
   overdueText: {
     fontSize: 14,
     color: "#dc3545",
-    fontWeight: "600",
+    // fontWeight: "600",
   },
   upcomingText: {
     fontSize: 14,
     color: "#ffc107",
-    fontWeight: "600",
+    // fontWeight: "600",
   },
   noFieldsContainer: {
     padding: 12,

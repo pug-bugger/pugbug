@@ -564,7 +564,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    // backgroundColor: "#28a745",
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 6,
@@ -572,7 +571,6 @@ const styles = StyleSheet.create({
     borderColor: "#ddd",
   },
   addFieldButtonText: {
-    // color: "white",
     fontSize: 14,
     fontWeight: "600",
   },
@@ -632,7 +630,6 @@ const styles = StyleSheet.create({
   fieldHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    // alignItems: "center",
     marginBottom: 10,
   },
   fieldLabel: {
@@ -640,9 +637,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#333",
-    // borderWidth: 1,
-    // borderColor: "#ddd",
-    // borderRadius: 6,
     padding: 8,
     marginRight: 10,
   },
@@ -704,7 +698,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     gap: 12,
-    marginTop: 20,
   },
   button: {
     flex: 1,

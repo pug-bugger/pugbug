@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { IconSymbol, type IconSymbolName } from "./IconSymbol";
 
-export type CustomButtonType = "default" | "auth";
+export type CustomButtonType = "default" | "primary" | "auth";
 
 interface CustomButtonProps {
   title?: string;
@@ -21,6 +21,7 @@ interface CustomButtonProps {
   children?: React.ReactNode;
   icon?: IconSymbolName;
   type?: CustomButtonType;
+  disabled?: boolean;
 }
 
 export default function CustomButton({
@@ -33,6 +34,7 @@ export default function CustomButton({
   children,
   icon,
   type = "default",
+  disabled = false,
 }: CustomButtonProps) {
   // Style presets
   let presetStyles = {};
@@ -44,6 +46,11 @@ export default function CustomButton({
     presetTextColor = textColor || "white";
     presetStyles = styles.authButton;
     presetTextStyles = styles.authText;
+  } else if (type === "primary") {
+    presetBg = backgroundColor || "black";
+    presetTextColor = textColor || "white";
+    presetStyles = styles.primaryButton;
+    presetTextStyles = styles.primaryText;
   } else {
     presetBg = backgroundColor || Colors.light.defaultButtonBg;
     presetTextColor = textColor || Colors.light.defaultButtonText;
@@ -59,8 +66,10 @@ export default function CustomButton({
         { backgroundColor: presetBg },
         pressed && styles.pressed,
         style,
+        disabled && styles.disabledButton,
       ]}
       onPress={onPress}
+      disabled={disabled}
     >
       {icon ? (
         <IconSymbol name={icon} size={24} color={presetTextColor} />
@@ -110,6 +119,21 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
   },
+  primaryButton: {
+    flex: 1,
+    backgroundColor: "black",
+    borderWidth: 1,
+    borderColor: "black",
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: "center",
+    marginHorizontal: 4,
+  },
+  primaryText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
+  },
   defaultButton: {
     flex: 1,
     backgroundColor: Colors.light.defaultButtonBg,
@@ -124,5 +148,8 @@ const styles = StyleSheet.create({
     color: Colors.light.defaultButtonText,
     fontSize: 16,
     fontWeight: "600",
+  },
+  disabledButton: {
+    opacity: 0.6,
   },
 });

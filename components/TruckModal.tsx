@@ -25,6 +25,7 @@ import {
 } from "../types/Truck";
 import { ThemedText } from "./ThemedText";
 import { ThemedView } from "./ThemedView";
+import CustomButton from "./ui/CustomButton";
 import { formatDate } from "./utils";
 
 interface TruckModalProps {
@@ -303,13 +304,7 @@ export const TruckModal: React.FC<TruckModalProps> = ({
       case CustomFieldType.BOOLEAN:
         const booleanField = field as BooleanCustomField;
         return (
-          <ThemedView
-            key={field.id}
-            style={[
-              styles.fieldContainer,
-              { backgroundColor: colorScheme === "dark" ? "#111" : "#f8f9fa" },
-            ]}
-          >
+          <ThemedView key={field.id} style={styles.fieldContainer}>
             <ThemedView style={styles.fieldHeader}>
               <TextInput
                 style={styles.fieldLabel}
@@ -335,6 +330,11 @@ export const TruckModal: React.FC<TruckModalProps> = ({
                   updateCustomField(field.id, { value })
                 }
                 disabled={loading}
+                trackColor={{
+                  true: "grey",
+                  false: "grey",
+                }}
+                thumbColor="black"
               />
               <ThemedText style={styles.switchLabel}>
                 {booleanField.value ? "Yes" : "No"}
@@ -361,14 +361,14 @@ export const TruckModal: React.FC<TruckModalProps> = ({
     >
       <ThemedView style={styles.overlay}>
         <ThemedView style={styles.modalContent}>
+          <ThemedText type="title" style={styles.modalTitle}>
+            {mode === "add" ? "Add New Truck" : "Edit Truck"}
+          </ThemedText>
           <ScrollView
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
+            overScrollMode="never"
           >
-            <ThemedText type="title" style={styles.modalTitle}>
-              {mode === "add" ? "Add New Truck" : "Edit Truck"}
-            </ThemedText>
-
             <ThemedView style={styles.inputContainer}>
               <ThemedText style={styles.label}>Truck Name *</ThemedText>
               <TextInput
@@ -463,29 +463,18 @@ export const TruckModal: React.FC<TruckModalProps> = ({
           </ScrollView>
 
           <ThemedView style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={[styles.button, styles.cancelButton]}
+            <CustomButton
+              title="Cancel"
               onPress={handleCancel}
               disabled={loading}
-              activeOpacity={0.7}
-            >
-              <ThemedText style={styles.buttonText}>Cancel</ThemedText>
-            </TouchableOpacity>
+            />
 
-            <TouchableOpacity
-              style={[
-                styles.button,
-                styles.saveButton,
-                loading && styles.disabledButton,
-              ]}
-              onPress={handleSave}
+            <CustomButton
               disabled={loading}
-              activeOpacity={0.7}
-            >
-              <ThemedText style={styles.buttonText}>
-                {loading ? "Saving..." : "Save"}
-              </ThemedText>
-            </TouchableOpacity>
+              type="primary"
+              title={loading ? "Saving..." : "Save"}
+              onPress={handleSave}
+            />
           </ThemedView>
         </ThemedView>
       </ThemedView>
@@ -693,6 +682,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   switchContainer: {
+    backgroundColor: "transparent",
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
@@ -720,7 +710,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#6c757d",
   },
   saveButton: {
-    backgroundColor: "#007bff",
+    flex: 1,
   },
   disabledButton: {
     opacity: 0.6,

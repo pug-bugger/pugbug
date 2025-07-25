@@ -39,8 +39,8 @@ const MAPPING = {
   calendar: "calendar-month",
   text: "short-text",
   number: "numbers",
-  "check-box": "check-box",
-  "dot.fill": "circle",
+  checkbox: "check-box",
+  dot: "circle",
 } as IconMapping;
 
 /**

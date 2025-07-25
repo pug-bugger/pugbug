@@ -17,6 +17,8 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+    Montserrat: require("../assets/fonts/Montserrat-VariableFont_wght.ttf"),
+    WorkSans: require("../assets/fonts/WorkSans-VariableFont_wght.ttf"),
   });
 
   if (!loaded) {

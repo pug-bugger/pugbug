@@ -107,7 +107,7 @@ const TruckList: React.FC<TruckListProps> = ({
   };
 
   const getFieldTypeIcon = (fieldType?: CustomFieldType) => {
-    if (!fieldType) return "dot.fill";
+    if (!fieldType) return "dot";
     switch (fieldType) {
       case CustomFieldType.DATE:
         return "calendar";
@@ -116,9 +116,9 @@ const TruckList: React.FC<TruckListProps> = ({
       case CustomFieldType.NUMBER:
         return "number";
       case CustomFieldType.BOOLEAN:
-        return "check-box";
+        return "checkbox";
       default:
-        return "dot.fill";
+        return "dot";
     }
   };
 

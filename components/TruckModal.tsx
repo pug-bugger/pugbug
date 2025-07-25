@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Alert,
   Modal,
@@ -26,6 +26,7 @@ import {
 import { ThemedText } from "./ThemedText";
 import { ThemedView } from "./ThemedView";
 import CustomButton from "./ui/CustomButton";
+import { IconSymbol } from "./ui/IconSymbol";
 import { formatDate } from "./utils";
 
 interface TruckModalProps {
@@ -57,6 +58,7 @@ export const TruckModal: React.FC<TruckModalProps> = ({
     fieldId: null,
     currentDate: null,
   });
+  const scrollViewRef = useRef<ScrollView>(null);
 
   useEffect(() => {
     if (visible && truck && mode === "edit") {
@@ -86,7 +88,14 @@ export const TruckModal: React.FC<TruckModalProps> = ({
       value: getDefaultValue(template?.type || CustomFieldType.TEXT),
     } as CustomField;
 
-    setCustomFields([...customFields, newField]);
+    setCustomFields((prevFields) => {
+      const updatedFields = [...prevFields, newField];
+      // Scroll to end after state update
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 100);
+      return updatedFields;
+    });
     setShowTemplates(false);
   };
 
@@ -178,6 +187,28 @@ export const TruckModal: React.FC<TruckModalProps> = ({
     hideDatePicker();
   };
 
+  const removeButton = ({ fieldId }: { fieldId: string }) => {
+    return (
+      <TouchableOpacity
+        onPress={() => removeCustomField(fieldId)}
+        disabled={loading}
+      >
+        <IconSymbol name="delete" size={20} color="black" />
+      </TouchableOpacity>
+    );
+  };
+
+  const clearButton = ({ fieldId }: { fieldId: string }) => {
+    return (
+      <TouchableOpacity
+        onPress={() => updateCustomField(fieldId, { value: null })}
+        disabled={loading}
+      >
+        <IconSymbol name="close" size={20} color="black" />
+      </TouchableOpacity>
+    );
+  };
+
   const renderCustomField = (field: CustomField) => {
     switch (field.type) {
       case CustomFieldType.DATE:
@@ -194,13 +225,7 @@ export const TruckModal: React.FC<TruckModalProps> = ({
                 placeholder="Field name"
                 editable={!loading}
               />
-              <TouchableOpacity
-                style={styles.removeButton}
-                onPress={() => removeCustomField(field.id)}
-                disabled={loading}
-              >
-                <ThemedText style={styles.removeButtonText}>✕</ThemedText>
-              </TouchableOpacity>
+              {removeButton({ fieldId: field.id })}
             </ThemedView>
             <ThemedView style={styles.dateContainer}>
               <TouchableOpacity
@@ -209,20 +234,12 @@ export const TruckModal: React.FC<TruckModalProps> = ({
                 disabled={loading}
                 activeOpacity={0.7}
               >
+                <IconSymbol name="calendar" size={20} color="black" />
                 <ThemedText style={styles.dateButtonText}>
                   {formatDate(dateField.value)}
                 </ThemedText>
               </TouchableOpacity>
-              {dateField.value && (
-                <TouchableOpacity
-                  style={styles.clearButton}
-                  onPress={() => updateCustomField(field.id, { value: null })}
-                  disabled={loading}
-                  activeOpacity={0.7}
-                >
-                  <ThemedText style={styles.clearButtonText}>Clear</ThemedText>
-                </TouchableOpacity>
-              )}
+              {dateField.value && clearButton({ fieldId: field.id })}
             </ThemedView>
           </ThemedView>
         );
@@ -241,13 +258,7 @@ export const TruckModal: React.FC<TruckModalProps> = ({
                 placeholder="Field name"
                 editable={!loading}
               />
-              <TouchableOpacity
-                style={styles.removeButton}
-                onPress={() => removeCustomField(field.id)}
-                disabled={loading}
-              >
-                <ThemedText style={styles.removeButtonText}>✕</ThemedText>
-              </TouchableOpacity>
+              {removeButton({ fieldId: field.id })}
             </ThemedView>
             <TextInput
               style={styles.input}
@@ -276,13 +287,7 @@ export const TruckModal: React.FC<TruckModalProps> = ({
                 placeholder="Field name"
                 editable={!loading}
               />
-              <TouchableOpacity
-                style={styles.removeButton}
-                onPress={() => removeCustomField(field.id)}
-                disabled={loading}
-              >
-                <ThemedText style={styles.removeButtonText}>✕</ThemedText>
-              </TouchableOpacity>
+              {removeButton({ fieldId: field.id })}
             </ThemedView>
             <TextInput
               style={styles.input}
@@ -315,13 +320,7 @@ export const TruckModal: React.FC<TruckModalProps> = ({
                 placeholder="Field name"
                 editable={!loading}
               />
-              <TouchableOpacity
-                style={styles.removeButton}
-                onPress={() => removeCustomField(field.id)}
-                disabled={loading}
-              >
-                <ThemedText style={styles.removeButtonText}>✕</ThemedText>
-              </TouchableOpacity>
+              {removeButton({ fieldId: field.id })}
             </ThemedView>
             <ThemedView style={styles.switchContainer}>
               <Switch
@@ -365,6 +364,7 @@ export const TruckModal: React.FC<TruckModalProps> = ({
             {mode === "add" ? "Add New Truck" : "Edit Truck"}
           </ThemedText>
           <ScrollView
+            ref={scrollViewRef}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
             overScrollMode="never"
@@ -410,6 +410,11 @@ export const TruckModal: React.FC<TruckModalProps> = ({
                   onPress={() => setShowTemplates(!showTemplates)}
                   disabled={loading}
                 >
+                  <IconSymbol
+                    name={showTemplates ? "close" : "plus"}
+                    size={20}
+                    color="black"
+                  />
                   <ThemedText style={styles.addFieldButtonText}>
                     {showTemplates ? "Hide Templates" : "Add Field"}
                   </ThemedText>
@@ -421,8 +426,9 @@ export const TruckModal: React.FC<TruckModalProps> = ({
                   style={[
                     styles.templatesContainer,
                     {
-                      backgroundColor:
-                        colorScheme === "dark" ? "#111" : "#f8f9fa",
+                      borderWidth: 1,
+                      borderColor: "#ddd",
+                      borderRadius: 8,
                     },
                   ]}
                 >
@@ -437,9 +443,11 @@ export const TruckModal: React.FC<TruckModalProps> = ({
                         onPress={() => addCustomField(template)}
                         disabled={loading}
                       >
-                        <ThemedText style={styles.templateIcon}>
-                          {template.icon}
-                        </ThemedText>
+                        <IconSymbol
+                          name={template.icon as IconSymbolName}
+                          size={20}
+                          color="black"
+                        />
                         <ThemedText style={styles.templateLabel}>
                           {template.label}
                         </ThemedText>
@@ -451,8 +459,9 @@ export const TruckModal: React.FC<TruckModalProps> = ({
                     onPress={() => addCustomField()}
                     disabled={loading}
                   >
+                    <IconSymbol name="edit" size={20} color="black" />
                     <ThemedText style={styles.customFieldButtonText}>
-                      + Custom Field
+                      Custom Field
                     </ThemedText>
                   </TouchableOpacity>
                 </ThemedView>
@@ -510,7 +519,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 8,
     elevation: 8,
-    padding: 18,
+    padding: 16,
   },
   modalTitle: {
     textAlign: "center",
@@ -525,7 +534,6 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     fontWeight: "600",
     fontSize: 16,
-    // color: "#333",
   },
   input: {
     borderWidth: 1,
@@ -533,7 +541,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 14,
     fontSize: 16,
-    // backgroundColor: "#fff",
     minHeight: Platform.OS === "android" ? 50 : 44,
   },
   textArea: {
@@ -552,30 +559,32 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "600",
-    // color: "#333",
   },
   addFieldButton: {
-    backgroundColor: "#28a745",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    // backgroundColor: "#28a745",
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "#ddd",
   },
   addFieldButtonText: {
-    color: "white",
+    // color: "white",
     fontSize: 14,
     fontWeight: "600",
   },
   templatesContainer: {
     marginBottom: 20,
     padding: 15,
-    // backgroundColor: "#f8f9fa",
     borderRadius: 8,
   },
   templatesTitle: {
     fontSize: 16,
     fontWeight: "600",
     marginBottom: 10,
-    // color: "#333",
   },
   templatesGrid: {
     flexDirection: "row",
@@ -584,7 +593,6 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   templateButton: {
-    // backgroundColor: "#fff",
     padding: 12,
     borderRadius: 8,
     alignItems: "center",
@@ -599,23 +607,24 @@ const styles = StyleSheet.create({
   templateLabel: {
     fontSize: 12,
     textAlign: "center",
-    // color: "#333",
   },
   customFieldButton: {
-    backgroundColor: "#6c757d",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
     padding: 12,
     borderRadius: 8,
-    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#ddd",
   },
   customFieldButtonText: {
-    // color: "white",
     fontSize: 14,
     fontWeight: "600",
   },
   fieldContainer: {
     marginBottom: 15,
     padding: 15,
-    // backgroundColor: "#f8f9fa",
     borderRadius: 8,
     borderWidth: 1,
     borderColor: "#e9ecef",
@@ -623,7 +632,7 @@ const styles = StyleSheet.create({
   fieldHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    // alignItems: "center",
     marginBottom: 10,
   },
   fieldLabel: {
@@ -631,11 +640,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#333",
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 6,
+    // borderWidth: 1,
+    // borderColor: "#ddd",
+    // borderRadius: 6,
     padding: 8,
-    // backgroundColor: "#fff",
     marginRight: 10,
   },
   removeButton: {
@@ -653,16 +661,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-  },
-  dateButton: {
-    flex: 1,
     borderWidth: 1,
     borderColor: "#ddd",
     borderRadius: 8,
     padding: 14,
-    backgroundColor: "#fff",
     minHeight: Platform.OS === "android" ? 50 : 44,
-    justifyContent: "center",
+  },
+  dateButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
   },
   dateButtonText: {
     fontSize: 16,

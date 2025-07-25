@@ -41,6 +41,8 @@ const MAPPING = {
   number: "numbers",
   checkbox: "check-box",
   dot: "circle",
+  delete: "close",
+  edit: "edit",
 } as IconMapping;
 
 /**

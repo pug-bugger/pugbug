@@ -47,26 +47,26 @@ export const FIELD_TEMPLATES = [
   {
     label: "Insurance Deadline",
     type: CustomFieldType.DATE,
-    icon: "📅",
+    icon: "calendar",
   },
   {
     label: "Tech Inspection Deadline",
     type: CustomFieldType.DATE,
-    icon: "🔧",
+    icon: "calendar",
   },
   {
     label: "License Plate",
     type: CustomFieldType.TEXT,
-    icon: "🚛",
+    icon: "text",
   },
   {
     label: "Mileage",
     type: CustomFieldType.NUMBER,
-    icon: "🔢",
+    icon: "number",
   },
   {
     label: "Is Active",
     type: CustomFieldType.BOOLEAN,
-    icon: "✅",
+    icon: "checkbox",
   },
 ];

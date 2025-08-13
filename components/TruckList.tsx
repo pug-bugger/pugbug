@@ -299,12 +299,10 @@ const styles = StyleSheet.create({
   overdueText: {
     fontSize: 14,
     color: "#dc3545",
-    // fontWeight: "600",
   },
   upcomingText: {
     fontSize: 14,
     color: "#ffc107",
-    // fontWeight: "600",
   },
   noFieldsContainer: {
     padding: 12,

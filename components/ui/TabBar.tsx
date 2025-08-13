@@ -31,7 +31,7 @@ export function CustomTabBar({
     <ThemedView
       style={[
         styles.tabBar,
-        { paddingBottom: insets.bottom > 0 ? insets.bottom : 12 },
+        { marginBottom: insets.bottom > 0 ? insets.bottom : 12 },
       ]}
     >
       {state.routes.map((route, index) => {
@@ -87,16 +87,17 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    height: 70,
-    borderRadius: 32,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
-    elevation: 8,
+    height: 60,
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    borderRadius: 0,
     borderWidth: 1,
+    borderBottomWidth: 0,
     borderColor: "#F0F0F3",
-    paddingHorizontal: 0,
+    shadowColor: "#aaa",
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   tabItemContainer: {
     flex: 1,

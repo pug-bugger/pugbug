@@ -4,34 +4,34 @@ import LogoutButton from "@/components/ui/LogoutButton";
 import { useAuth } from "@/contexts/AuthContext";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import React from "react";
-import { Animated, SafeAreaView, StyleSheet } from "react-native";
+import { Animated, StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function NotificationsScreen() {
   const { logout } = useAuth();
   const backgroundColor = useThemeColor({}, "background");
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor }]}>
-      <Animated.ScrollView
-        overScrollMode="never"
-        showsVerticalScrollIndicator={false}
-      >
-        <ThemedView style={styles.contentContainer}>
+    <>
+      <SafeAreaView style={[styles.container, { backgroundColor }]}>
+        <Animated.ScrollView
+          overScrollMode="never"
+          showsVerticalScrollIndicator={false}
+        >
           <NotificationSettings />
-        </ThemedView>
 
-        <ThemedView style={styles.logoutContainer}>
-          <LogoutButton onPress={logout} />
-        </ThemedView>
-      </Animated.ScrollView>
-    </SafeAreaView>
+          <ThemedView style={styles.logoutContainer}>
+            <LogoutButton onPress={logout} />
+          </ThemedView>
+        </Animated.ScrollView>
+      </SafeAreaView>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 48,
   },
   contentContainer: {
     flex: 1,

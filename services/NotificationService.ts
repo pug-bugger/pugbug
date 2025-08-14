@@ -109,7 +109,7 @@ class NotificationService {
         await Notifications.setNotificationChannelAsync('truck-deadlines', {
           name: 'Truck Deadlines',
           importance: Notifications.AndroidImportance.HIGH,
-          vibrationPattern: [0, 250, 250, 250],
+          vibrationPattern: [0, 250, 0, 250],
           lightColor: '#FF231F7C',
           description: 'Notifications for truck inspection and insurance deadlines',
         });
@@ -220,25 +220,26 @@ class NotificationService {
   }
 
   // Deadline checking
-  private async performDailyCheck() {
+  private async performDailyCheck({force = false} = {}) {
     try {
       const settings = await this.getSettings();
       if (!settings.enabled) return;
 
       const now = new Date();
       const lastCheck = await this.lastCheckStorage.load(LAST_CHECK_KEY);
-      
+
       // Check if we've already checked today
       if (lastCheck) {
         const lastCheckDate = new Date(lastCheck);
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         const lastCheckDay = new Date(lastCheckDate.getFullYear(), lastCheckDate.getMonth(), lastCheckDate.getDate());
         
-        if (today.getTime() === lastCheckDay.getTime()) {
-          // console.log('Daily check already performed today');
+        if (today.getTime() === lastCheckDay.getTime() && !force) {
+          console.log('Daily check already performed today');
           return;
         }
       }
+      
 
       // Load trucks from storage
       const trucksStorage = new AsyncStorageService<Truck[]>();
@@ -246,6 +247,7 @@ class NotificationService {
 
       // Check for trucks with upcoming deadlines
       const trucksWithWarnings = this.getTrucksWithUpcomingDeadlines(trucks, settings.warningDays);
+      console.log("trucksWithWarnings", trucksWithWarnings);
 
       if (trucksWithWarnings.length > 0) {
         await this.sendDeadlineNotification(trucksWithWarnings);
@@ -271,7 +273,8 @@ class NotificationService {
         
         dateFields.forEach(field => {
           if (field.value) {
-            const fieldDate = new Date(field.value);
+            const fieldDate = new Date(field.value.seconds * 1000);
+
             const timeDiff = fieldDate.getTime() - now.getTime();
             const daysUntil = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
             
@@ -417,7 +420,7 @@ class NotificationService {
 
   // Manual operations
   async triggerManualCheck(): Promise<void> {
-    await this.performDailyCheck();
+    await this.performDailyCheck({force: true});
   }
 
   async sendTestNotification(): Promise<void> {

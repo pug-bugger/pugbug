@@ -167,7 +167,7 @@ export const NotificationSettings: React.FC = () => {
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <ThemedView style={styles.container}>
       <ThemedView style={styles.section}>
         <ThemedText type="title" style={styles.sectionTitle}>
           Notification Settings
@@ -338,13 +338,14 @@ export const NotificationSettings: React.FC = () => {
           </ThemedText>
         </ThemedView>
       </ThemedView>
-    </ScrollView>
+    </ThemedView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingTop: 12,
   },
   loadingContainer: {
     flex: 1,

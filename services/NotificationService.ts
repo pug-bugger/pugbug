@@ -73,8 +73,6 @@ class NotificationService {
         console.error('Background notification task error:', error);
         return;
       }
-
-      // console.log('Background notification task triggered');
       
       // Check if it's time for daily notification
       await this.performDailyCheck();
@@ -87,7 +85,6 @@ class NotificationService {
         return;
       }
 
-      // console.log('Daily check task triggered');
       await this.performDailyCheck();
     });
   }
@@ -359,7 +356,6 @@ class NotificationService {
         trigger: null, // Send immediately
       });
 
-      // console.log('Deadline notification sent:', { title, body });
     } catch (error) {
       console.error('Error sending deadline notification:', error);
     }
@@ -387,7 +383,7 @@ class NotificationService {
 
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: 'Daily Truck Check',
+          title: 'Daily Vehicle Check',
           body: 'Checking for upcoming deadlines...',
           data: {
             type: 'daily_check',
@@ -400,7 +396,6 @@ class NotificationService {
         },
       });
 
-      // console.log(`Daily notification scheduled for ${settings.dailyTime}`);
     } catch (error) {
       console.error('Error scheduling notification:', error);
     }

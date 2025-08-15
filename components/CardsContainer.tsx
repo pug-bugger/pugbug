@@ -18,8 +18,12 @@ export default function CardsContainer() {
       overScrollMode="never"
     >
       <ThemedView style={styles.container}>
-        <CardItem label="Total Trucks" value={trucks.length.toString()} />
         <CardItem
+          label="Total Trucks"
+          value={trucks.length.toString()}
+          onPress={() => onPress(`of total trucks: ${trucks.length}`)}
+        />
+        {/* <CardItem
           label="Total Records"
           value="2"
           onPress={() => onPress("2")}
@@ -33,7 +37,7 @@ export default function CardsContainer() {
           label="Total Records"
           value="4"
           onPress={() => onPress("4")}
-        />
+        /> */}
       </ThemedView>
     </ScrollView>
   );

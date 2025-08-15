@@ -50,7 +50,6 @@ class NotificationService {
       // Set notification handler
       Notifications.setNotificationHandler({
         handleNotification: async () => ({
-          shouldShowAlert: true,
           shouldPlaySound: true,
           shouldSetBadge: true,
           shouldShowBanner: true,
@@ -111,7 +110,7 @@ class NotificationService {
           importance: Notifications.AndroidImportance.HIGH,
           vibrationPattern: [0, 250, 0, 250],
           lightColor: '#FF231F7C',
-          description: 'Notifications for truck inspection and insurance deadlines',
+          description: 'Notifications for vehicle deadlines',
         });
       }
 
@@ -128,12 +127,12 @@ class NotificationService {
         });
         finalStatus = status;
       }
-
+      
       const granted = finalStatus === 'granted';
       
       if (granted) {
         // Register background task
-        await this.registerBackgroundTask();
+        await this.registerBackgroundTask(true);
       }
 
       return {
@@ -195,27 +194,16 @@ class NotificationService {
   }
 
   // Background task management
-  private async registerBackgroundTask() {
+  private async registerBackgroundTask(register = true) {
     try {
       const isRegistered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_NOTIFICATION_TASK);
-      if (!isRegistered) {
+      if (!isRegistered && register) {
         await Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);
-        // console.log('Background notification task registered');
-      }
-    } catch (error) {
-      console.error('Error registering background task:', error);
-    }
-  }
-
-  private async unregisterBackgroundTask() {
-    try {
-      const isRegistered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_NOTIFICATION_TASK);
-      if (isRegistered) {
+      } else if (isRegistered && !register) {
         await Notifications.unregisterTaskAsync(BACKGROUND_NOTIFICATION_TASK);
-        // console.log('Background notification task unregistered');
       }
     } catch (error) {
-      console.error('Error unregistering background task:', error);
+      console.error(`Error ${register ? 'registering' : 'unregistering'} background task:`, error);
     }
   }
 
@@ -235,8 +223,8 @@ class NotificationService {
         const lastCheckDay = new Date(lastCheckDate.getFullYear(), lastCheckDate.getMonth(), lastCheckDate.getDate());
         
         if (today.getTime() === lastCheckDay.getTime() && !force) {
-          console.log('Daily check already performed today');
-          return;
+          console.warn('Daily check already performed today');
+          // return;
         }
       }
       
@@ -445,7 +433,7 @@ class NotificationService {
   async disable(): Promise<void> {
     try {
       await Notifications.cancelAllScheduledNotificationsAsync();
-      await this.unregisterBackgroundTask();
+      await this.registerBackgroundTask(false);
       await this.updateSettings({ enabled: false });
     } catch (error) {
       console.error('Error disabling notifications:', error);
